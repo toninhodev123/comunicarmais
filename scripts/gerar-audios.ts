@@ -107,10 +107,17 @@ async function provedorEdge(): Promise<Provedor> {
 }
 
 function chaveEleven() {
-  const chave = process.env.ELEVENLABS_API_KEY;
+  // Espaço ou quebra de linha na colagem (acontece muito no secret do GitHub)
+  // faz a API recusar com "API key must be exactly 51 characters".
+  const chave = process.env.ELEVENLABS_API_KEY?.trim();
   if (!chave) {
     throw new Error(
       "Falta a chave: export ELEVENLABS_API_KEY=sk_... (pegue em elevenlabs.io → perfil → API keys)",
+    );
+  }
+  if (!/^sk_[A-Za-z0-9]+$/.test(chave)) {
+    throw new Error(
+      `A chave não parece uma chave do ElevenLabs (${chave.length} caracteres, esperado 51 começando com "sk_"). Recadastre o secret colando só a chave, sem espaços.`,
     );
   }
   return chave;
@@ -137,7 +144,11 @@ async function provedorEleven(): Promise<Provedor> {
         },
       );
       if (!resposta.ok) {
-        throw new Error(`HTTP ${resposta.status}: ${(await resposta.text()).slice(0, 200)}`);
+        const corpo = (await resposta.text()).slice(0, 300);
+        if (resposta.status === 400 || resposta.status === 401) {
+          throw new Error(`Chave recusada pelo ElevenLabs (HTTP ${resposta.status}): ${corpo}`);
+        }
+        throw new Error(`HTTP ${resposta.status}: ${corpo}`);
       }
       await writeFile(`${destino}.mp3`, Buffer.from(await resposta.arrayBuffer()));
     },
