@@ -2,8 +2,10 @@
 
 O app fala de duas maneiras, nesta ordem:
 
-1. **Áudio gravado** (`public/audio/<slug>.mp3`). Voz neural de verdade, idêntica em
-   qualquer celular ou computador, sem depender do que está instalado no aparelho.
+1. **Áudio gravado** (`public/audio/<banco>/<slug>.mp3`). Voz neural de verdade,
+   idêntica em qualquer celular ou computador. Cada **banco** é uma voz (por
+   exemplo `feminina` e `masculina`) e aparece em *Personalizar → Voz do
+   aplicativo* para a pessoa escolher.
 2. **Voz do navegador** (Web Speech API), usada só quando a frase não tem gravação.
    A pessoa escolhe qual em *Personalizar → Voz do aplicativo*.
 
@@ -33,7 +35,7 @@ O plano grátis dá 10.000 créditos por mês, então o app inteiro cabe de sobr
 export ELEVENLABS_API_KEY=sk_...
 
 bun run audio -- --provedor=elevenlabs --listar-vozes     # ids das suas vozes
-bun run audio -- --provedor=elevenlabs --voz=<id_da_voz>  # grava tudo
+bun run audio -- --provedor=elevenlabs --voz=<id> --banco=feminina
 ```
 
 > **Plano gratuito**: vozes da *Voice Library* (aquelas que você adiciona da
@@ -60,7 +62,8 @@ do ElevenLabs, mas são boas e não têm cota:
 
 ```bash
 bun run audio -- --listar-vozes                  # vozes pt disponíveis
-bun run audio -- --voz=pt-BR-AntonioNeural       # grava tudo
+bun run audio -- --voz=pt-BR-FranciscaNeural --banco=feminina
+bun run audio -- --voz=pt-BR-AntonioNeural --banco=masculina
 ```
 
 ### Opções comuns
@@ -69,13 +72,27 @@ bun run audio -- --voz=pt-BR-AntonioNeural       # grava tudo
 | --- | --- |
 | `--forcar` | regrava os arquivos que já existem |
 | `--so=palavras` / `--so=frases` | grava só um tipo de conteúdo |
-| `--atualizar-lista` | só reescreve `src/lib/data/audios.ts` a partir da pasta |
+| `--banco=<nome>` | em qual voz gravar (`feminina`, `masculina`, …) |
+| `--ritmo=<n>` | velocidade da fala no Edge (padrão `0.92`, um pouco calma) |
+| `--atualizar-lista` | só reescreve `src/lib/data/audios.ts` a partir das pastas |
 
 Depois de gravar, confira no navegador e faça commit de `public/audio/` junto com
 `src/lib/data/audios.ts` — é esse arquivo que diz ao app quais frases já têm áudio.
 
-## Trocando a voz depois
+## Duas vozes ao mesmo tempo
 
-Para regravar tudo com outra voz: apague `public/audio/*.mp3` e rode de novo com
-`--voz=<nova>`. Para regravar só um trecho, apague os mp3 daquelas frases (ou use
-`--forcar --so=frases`).
+Rode uma vez por voz, mudando `--banco`:
+
+```bash
+bun run audio -- --voz=pt-BR-FranciscaNeural --banco=feminina
+bun run audio -- --voz=pt-BR-AntonioNeural  --banco=masculina
+```
+
+As duas aparecem em *Personalizar* e a escolha fica salva no navegador. Se a
+pessoa escolher uma voz que ainda não tem a frase gravada, o app usa a outra —
+e, não havendo nenhuma, a voz do navegador.
+
+## Trocando a voz de um banco
+
+Apague a pasta daquele banco (`public/audio/<banco>/`) e rode de novo com a voz
+nova, ou use `--forcar --banco=<banco>`.

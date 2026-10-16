@@ -13,11 +13,14 @@
  *
  *   Edge / Microsoft (neural, sem chave e sem limite — bom para recomeçar)
  *     bun run audio -- --listar-vozes
- *     bun run audio -- --voz=pt-BR-AntonioNeural
+ *     bun run audio -- --voz=pt-BR-AntonioNeural --banco=masculina
  *
  * Outras opções: --forcar regrava o que já existe; --so=frases|palavras limita
  * o lote (útil para gastar crédito só onde a voz importa mais);
- * --atualizar-lista só reescreve src/lib/data/audios.ts a partir da pasta.
+ * --atualizar-lista só reescreve src/lib/data/audios.ts a partir das pastas.
+ *
+ * Cada --banco é uma voz guardada em public/audio/<banco>/; o app mostra todas
+ * em Personalizar para a pessoa escolher. Sem --banco, grava em "padrao".
  */
 import { mkdir, readdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -34,6 +37,7 @@ import { slugDeTexto } from "../src/lib/voz";
 
 const RAIZ = path.resolve(import.meta.dirname, "..");
 const PASTA_AUDIO = path.join(RAIZ, "public", "audio");
+const BANCO_PADRAO = "padrao";
 const ARQUIVO_LISTA = path.join(RAIZ, "src", "lib", "data", "audios.ts");
 
 const VOZ_EDGE_PADRAO = "pt-BR-ThalitaMultilingualNeural";
@@ -106,7 +110,8 @@ async function provedorEdge(): Promise<Provedor> {
     gravar: async (texto, destino) => {
       // O texto entra num SSML: escapamos o que quebraria o XML.
       const seguro = texto.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      await tts.toFile(destino, seguro);
+      // Um tiquinho mais devagar: fica mais fácil de acompanhar.
+      await tts.toFile(destino, seguro, { rate: Number(argumento("ritmo") ?? 0.92) });
     },
   };
 }
@@ -225,6 +230,11 @@ async function listarVozes(provedor: string) {
 // -------------------------------------------------------------------- gerar
 
 async function gerar(nomeProvedor: string) {
+  const banco = (argumento("banco") ?? BANCO_PADRAO).toLowerCase();
+  if (!/^[a-z0-9-]+$/.test(banco)) {
+    throw new Error(`Nome de banco inválido: "${banco}" (use letras, números e hífen).`);
+  }
+  const pastaBanco = path.join(PASTA_AUDIO, banco);
   const forcar = temFlag("forcar");
   const so = argumento("so");
   const todos = textosDoApp();
@@ -238,9 +248,10 @@ async function gerar(nomeProvedor: string) {
   const provedor = nomeProvedor === "elevenlabs" ? await provedorEleven() : await provedorEdge();
   const caracteres = textos.reduce((n, t) => n + t.texto.length, 0);
 
-  await mkdir(PASTA_AUDIO, { recursive: true });
+  await mkdir(pastaBanco, { recursive: true });
   console.log(`Provedor: ${provedor.nome}`);
   console.log(`Voz: ${provedor.voz}`);
+  console.log(`Banco: ${banco} (public/audio/${banco})`);
   console.log(
     `Textos: ${textos.length} (${caracteres} caracteres)${forcar ? " — regravando tudo" : ""}`,
   );
@@ -250,7 +261,7 @@ async function gerar(nomeProvedor: string) {
   let falhas = 0;
   for (const [i, { texto }] of textos.entries()) {
     const slug = slugDeTexto(texto);
-    const destino = path.join(PASTA_AUDIO, slug);
+    const destino = path.join(pastaBanco, slug);
     if (!forcar && existsSync(`${destino}.mp3`)) {
       pulados++;
       continue;
@@ -285,28 +296,42 @@ async function gerar(nomeProvedor: string) {
   }
 }
 
-/** Reescreve src/lib/data/audios.ts a partir do que está em public/audio. */
+/** Reescreve src/lib/data/audios.ts a partir das pastas em public/audio. */
 async function escreverLista() {
-  const arquivos = existsSync(PASTA_AUDIO) ? await readdir(PASTA_AUDIO) : [];
-  const slugs = arquivos
-    .filter((f) => f.endsWith(".mp3"))
-    .map((f) => f.replace(/\.mp3$/, ""))
-    .sort();
+  const entradas = existsSync(PASTA_AUDIO)
+    ? await readdir(PASTA_AUDIO, { withFileTypes: true })
+    : [];
+  const bancos: Record<string, string[]> = {};
+  for (const entrada of entradas) {
+    if (!entrada.isDirectory()) continue;
+    const arquivos = await readdir(path.join(PASTA_AUDIO, entrada.name));
+    const slugs = arquivos
+      .filter((f) => f.endsWith(".mp3"))
+      .map((f) => f.replace(/\.mp3$/, ""))
+      .sort();
+    if (slugs.length > 0) bancos[entrada.name] = slugs;
+  }
 
-  const lista = slugs.length === 0 ? "[]" : `[\n${slugs.map((s) => `  "${s}",`).join("\n")}\n]`;
+  const corpo = Object.entries(bancos)
+    .map(([nome, slugs]) => `  "${nome}": [\n${slugs.map((s) => `    "${s}",`).join("\n")}\n  ],`)
+    .join("\n");
+
   await writeFile(
     ARQUIVO_LISTA,
     `// ARQUIVO GERADO — não edite à mão.
-// Rode \`bun run audio\` para gravar os áudios em public/audio e atualizar esta lista.
-// Cada item é o nome do arquivo (sem extensão) dentro de /audio.
-// Com a lista vazia o app usa a voz do próprio navegador.
+// Rode \`bun run audio\` (ou o workflow "Gerar áudios") para gravar os arquivos
+// em public/audio/<banco>/ e atualizar esta lista. Cada banco é uma voz; os
+// itens são os nomes dos arquivos, sem extensão. Sem bancos aqui, o app fala
+// com a voz do próprio navegador.
 
-export const audiosGravados: string[] = ${lista};
-
-export const audiosDisponiveis = new Set(audiosGravados);
+export const bancosDeAudio: Record<string, string[]> = ${corpo ? `{\n${corpo}\n}` : "{}"};
 `,
   );
-  console.log(`Lista atualizada: ${slugs.length} áudios em src/lib/data/audios.ts`);
+  const total = Object.values(bancos).reduce((n, s) => n + s.length, 0);
+  console.log(
+    `Lista atualizada: ${total} áudios em ${Object.keys(bancos).length} banco(s) ` +
+      `(${Object.keys(bancos).join(", ") || "nenhum"}).`,
+  );
 }
 
 const provedorEscolhido = argumento("provedor") ?? "edge";

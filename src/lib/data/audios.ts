@@ -1,8 +1,7 @@
 // ARQUIVO GERADO — não edite à mão.
-// Rode `bun run audio` para gravar os áudios em public/audio e atualizar esta lista.
-// Cada item é o nome do arquivo (sem extensão) dentro de /audio.
-// Com a lista vazia o app usa a voz do próprio navegador.
+// Rode `bun run audio` (ou o workflow "Gerar áudios") para gravar os arquivos
+// em public/audio/<banco>/ e atualizar esta lista. Cada banco é uma voz; os
+// itens são os nomes dos arquivos, sem extensão. Sem bancos aqui, o app fala
+// com a voz do próprio navegador.
 
-export const audiosGravados: string[] = [];
-
-export const audiosDisponiveis = new Set(audiosGravados);
+export const bancosDeAudio: Record<string, string[]> = {};
