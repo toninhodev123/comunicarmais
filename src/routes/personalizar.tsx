@@ -114,9 +114,9 @@ function CustomizePage() {
         <h2 className="text-xl font-bold">Progresso</h2>
         <p className="mt-1 text-muted-foreground">
           As estrelinhas ficam salvas neste navegador, mesmo se você fechar ou atualizar a página. A
-          meta diária de hoje é {dailyGoal} estrelinhas em cada atividade (Banco de Fonemas, Memória
-          Auditiva, Trava-Línguas e Habilidades Sociais) — definida pelo mascote escolhido — e
-          reseta todo dia.
+          meta diária de hoje é {dailyGoal} estrelinhas em cada atividade (Banco de Palavras,
+          Memória Auditiva, Trava-Línguas e Habilidades Sociais) — definida pelo mascote escolhido —
+          e reseta todo dia.
         </p>
         <div className="mt-4 flex items-center gap-3 rounded-2xl bg-muted px-4 py-3">
           <Flame className="h-6 w-6 fill-warm text-warm" />

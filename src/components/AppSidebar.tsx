@@ -17,7 +17,7 @@ import { useApp } from "@/context/AppContext";
 
 const items = [
   { title: "Início", url: "/", icon: Home },
-  { title: "Banco de Fonemas", url: "/fonemas", icon: Mic },
+  { title: "Banco de Palavras", url: "/fonemas", icon: Mic },
   { title: "Vocabulário", url: "/vocabulario", icon: BookOpen },
   { title: "Memória Auditiva", url: "/memoria", icon: Brain },
   { title: "Trava-Línguas", url: "/desafios", icon: Sparkles },

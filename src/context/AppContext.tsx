@@ -23,7 +23,7 @@ export const mascots: Mascot[] = [
     name: "Nina, a Coelha",
     emoji: "🐰",
     greeting: "Oi! Pronta para pular nos sons?",
-    dailyGoal: 2,
+    dailyGoal: 6,
     difficulty: "Fácil",
     tagline: "Nina é gentil e calma — no ritmo dela, sem pressa nenhuma.",
   },
@@ -32,7 +32,7 @@ export const mascots: Mascot[] = [
     name: "Tito, o Tucano",
     emoji: "🦜",
     greeting: "Olá! Bora soltar a voz?",
-    dailyGoal: 4,
+    dailyGoal: 12,
     difficulty: "Médio",
     tagline: "Tito é esperto e cheio de energia — pronto pra voar mais alto.",
   },
@@ -41,7 +41,7 @@ export const mascots: Mascot[] = [
     name: "Léo, o Leão",
     emoji: "🦁",
     greeting: "Roar! Vamos brincar de falar?",
-    dailyGoal: 6,
+    dailyGoal: 20,
     difficulty: "Difícil",
     tagline: "Léo é bravo e corajoso — só encara quem não tem medo do desafio!",
   },
@@ -85,7 +85,7 @@ export const themeColors: Record<
 
 /** Áreas que contam para a meta diária — os ids batem com o `area` usado em adicionarEstrelas(). */
 export const PRACTICE_AREAS = [
-  { id: "fonemas", label: "Banco de Fonemas" },
+  { id: "fonemas", label: "Banco de Palavras" },
   { id: "memoria", label: "Memória Auditiva" },
   { id: "desafios", label: "Trava-Línguas" },
   { id: "habilidades", label: "Habilidades Sociais" },
