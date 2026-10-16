@@ -7,8 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   aoCarregarVozes,
+  bancoPreferido,
+  bancosDisponiveis,
+  definirBancoPreferido,
   definirVozPreferida,
   falar,
+  nomeDoBanco,
   vozPreferida,
   vozesPortugues,
 } from "@/lib/voz";
@@ -154,6 +158,16 @@ const FRASE_TESTE = "Oi! Eu sou a voz que vai falar com você.";
 function SecaoVoz() {
   const [vozes, setVozes] = useState<SpeechSynthesisVoice[]>([]);
   const [escolhida, setEscolhida] = useState<string | null>(null);
+  const bancos = bancosDisponiveis();
+  const [banco, setBanco] = useState<string | null>(null);
+
+  useEffect(() => setBanco(bancoPreferido() ?? bancos[0] ?? null), [bancos.length]);
+
+  const escolherBanco = (nome: string) => {
+    setBanco(nome);
+    definirBancoPreferido(nome);
+    falar(FRASE_TESTE);
+  };
 
   useEffect(() => {
     const atualizar = () => {
@@ -173,11 +187,43 @@ function SecaoVoz() {
   return (
     <section className="mb-8">
       <h2 className="mb-3 text-xl font-bold">Voz do aplicativo</h2>
+
+      {bancos.length > 0 && (
+        <div className="mb-5">
+          <p className="mb-3 text-sm text-muted-foreground">
+            Vozes gravadas: soam igual em qualquer celular ou computador. Toque para ouvir e
+            escolher.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {bancos.map((b) => {
+              const ativo = b === banco;
+              return (
+                <button
+                  key={b}
+                  onClick={() => escolherBanco(b)}
+                  aria-pressed={ativo}
+                  className={
+                    "flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all " +
+                    (ativo
+                      ? "border-primary bg-primary/10 shadow-md"
+                      : "border-border bg-card hover:border-primary/50")
+                  }
+                >
+                  <Volume2 className="h-5 w-5 shrink-0" />
+                  <span className="min-w-0 flex-1 font-semibold">{nomeDoBanco(b)}</span>
+                  {ativo && <Check className="h-5 w-5 shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <p className="mb-3 text-sm text-muted-foreground">
-        Quando uma palavra ou frase tem áudio gravado (voz neural, igual em qualquer aparelho), o
-        app usa a gravação. A voz abaixo é a reserva, usada no que ainda não foi gravado — as
-        marcadas como <strong>Natural</strong>, <strong>Neural</strong> ou <strong>Google</strong>{" "}
-        são as menos robóticas. Toque em uma para ouvir e já deixar escolhida.
+        {bancos.length > 0 ? "Voz de reserva" : "Voz do navegador"}, usada no que ainda não tem
+        gravação — as marcadas como <strong>Natural</strong>, <strong>Neural</strong> ou{" "}
+        <strong>Google</strong> são as menos robóticas. Toque em uma para ouvir e já deixar
+        escolhida.
       </p>
       {vozes.length === 0 ? (
         <p className="rounded-xl bg-warm/30 px-3 py-2 text-sm">

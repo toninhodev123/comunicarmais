@@ -3,7 +3,44 @@
 // tiver gravação, caímos na voz do próprio navegador (Web Speech API). O
 // reconhecimento de fala do microfone também mora aqui.
 
-import { audiosDisponiveis } from "@/lib/data/audios";
+import { bancosDeAudio } from "@/lib/data/audios";
+
+const BANCO_STORAGE_KEY = "comunicar-plus:banco-voz";
+
+/** Nomes amigáveis dos bancos gravados; outros nomes aparecem como vieram. */
+const NOMES_DE_BANCO: Record<string, string> = {
+  feminina: "Voz feminina",
+  masculina: "Voz masculina",
+};
+
+export function nomeDoBanco(banco: string) {
+  return NOMES_DE_BANCO[banco] ?? banco;
+}
+
+/** Bancos de áudio gravados (um por voz), na ordem em que aparecem na tela. */
+export function bancosDisponiveis(): string[] {
+  return Object.keys(bancosDeAudio).filter((b) => bancosDeAudio[b].length > 0);
+}
+
+export function bancoPreferido(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const salvo = window.localStorage.getItem(BANCO_STORAGE_KEY);
+    return salvo && bancosDisponiveis().includes(salvo) ? salvo : null;
+  } catch {
+    return null;
+  }
+}
+
+export function definirBancoPreferido(banco: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (banco) window.localStorage.setItem(BANCO_STORAGE_KEY, banco);
+    else window.localStorage.removeItem(BANCO_STORAGE_KEY);
+  } catch {
+    // ignora erros de storage (ex.: navegação privada)
+  }
+}
 
 /** Nome do arquivo de áudio correspondente a um texto. */
 export function slugDeTexto(texto: string) {
@@ -16,8 +53,14 @@ export function slugDeTexto(texto: string) {
     .slice(0, 80);
 }
 
-export function temAudioGravado(texto: string) {
-  return audiosDisponiveis.has(slugDeTexto(texto));
+/** Em qual banco está a gravação deste texto, se é que existe alguma. */
+export function bancoComAudio(texto: string): string | null {
+  const slug = slugDeTexto(texto);
+  const preferido = bancoPreferido();
+  if (preferido && bancosDeAudio[preferido]?.includes(slug)) return preferido;
+  // Sem preferência (ou banco incompleto): qualquer gravação é melhor que a
+  // voz sintética do navegador.
+  return bancosDisponiveis().find((b) => bancosDeAudio[b].includes(slug)) ?? null;
 }
 
 let audioAtual: HTMLAudioElement | null = null;
@@ -113,9 +156,10 @@ export function falar(texto: string, opcoes: { rate?: number; pitch?: number } =
   if (typeof window === "undefined") return;
   pararAudio();
   // Áudio gravado: voz neural igual em qualquer aparelho.
-  if (temAudioGravado(texto)) {
+  const banco = bancoComAudio(texto);
+  if (banco) {
     try {
-      const audio = new Audio(`/audio/${slugDeTexto(texto)}.mp3`);
+      const audio = new Audio(`/audio/${banco}/${slugDeTexto(texto)}.mp3`);
       // Mantém o tom ao desacelerar, em vez de virar voz de desenho animado.
       audio.preservesPitch = true;
       audio.playbackRate = Math.min(2, Math.max(0.5, opcoes.rate ?? 1));
