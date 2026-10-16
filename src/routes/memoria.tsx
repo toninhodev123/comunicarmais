@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Volume2, Mic, Star, Check } from "lucide-react";
+import { Volume2, Star, Play, Trophy } from "lucide-react";
 import confetti from "canvas-confetti";
 import { memoryWords, type MemoryWord } from "@/lib/data/memoryWords";
-import { falar, ouvir, palavraCorresponde, tocarSucesso, tocarErro } from "@/lib/voz";
+import { falar, tocarTom, tocarSucesso, tocarErro } from "@/lib/voz";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useApp } from "@/context/AppContext";
@@ -14,16 +14,28 @@ export const Route = createFileRoute("/memoria")({
   head: () => ({
     meta: [
       { title: "Memória Auditiva — Comunicar+" },
-      { name: "description", content: "Ouça a palavra, repita e toque no emoji certo." },
+      {
+        name: "description",
+        content: "Jogo estilo Genius: ouça a sequência de palavras e repita tocando nas imagens.",
+      },
     ],
   }),
   component: MemoryPage,
 });
 
-function palavraAleatoria(excluirId?: string) {
-  const pool = excluirId ? memoryWords.filter((w) => w.id !== excluirId) : memoryWords;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
+/** Quantos botões ficam na mesa — cada um é uma palavra com a imagem dela. */
+const QTD_PADS = 4;
+const RECORDE_KEY = "comunicar-plus:recorde-memoria";
+
+const CORES_PADS = [
+  "oklch(0.78 0.14 30)",
+  "oklch(0.78 0.13 145)",
+  "oklch(0.78 0.13 240)",
+  "oklch(0.78 0.13 300)",
+];
+const TONS_PADS = [330, 392, 494, 587];
+
+type Fase = "parado" | "mostrando" | "jogador";
 
 function embaralhar<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -34,80 +46,142 @@ function embaralhar<T>(arr: T[]): T[] {
   return a;
 }
 
-function gerarOpcoes(palavra: MemoryWord): MemoryWord[] {
-  const distratoras = embaralhar(memoryWords.filter((w) => w.id !== palavra.id)).slice(0, 3);
-  return embaralhar([palavra, ...distratoras]);
+function sortearPads(): MemoryWord[] {
+  return embaralhar(memoryWords).slice(0, QTD_PADS);
+}
+
+function esperar(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function carregarRecorde(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const salvo = window.localStorage.getItem(RECORDE_KEY);
+    const n = salvo ? Number(salvo) : 0;
+    return Number.isFinite(n) ? n : 0;
+  } catch {
+    return 0;
+  }
 }
 
 function MemoryPage() {
   const { adicionarEstrelas } = useApp();
-  const [palavra, setPalavra] = useState<MemoryWord>(() => palavraAleatoria());
-  const [opcoes, setOpcoes] = useState<MemoryWord[]>(() => gerarOpcoes(palavra));
-  const [falou, setFalou] = useState(false);
-  const [emojiCerto, setEmojiCerto] = useState(false);
-  const [ouvindo, setOuvindo] = useState(false);
-  const [score, setScore] = useState(0);
-  const [semSuporte, setSemSuporte] = useState(false);
+  const [pads, setPads] = useState<MemoryWord[]>(sortearPads);
+  const [sequencia, setSequencia] = useState<number[]>([]);
+  const [passo, setPasso] = useState(0);
+  const [fase, setFase] = useState<Fase>("parado");
+  const [aceso, setAceso] = useState<number | null>(null);
+  const [rodadasVencidas, setRodadasVencidas] = useState(0);
+  const [recorde, setRecorde] = useState(carregarRecorde);
+
+  // Cada apresentação da sequência ganha um id; se outra começar (ou a tela
+  // for fechada) a anterior para sozinha no meio do caminho.
+  const execucaoRef = useRef(0);
+  useEffect(() => () => void execucaoRef.current++, []);
 
   useEffect(() => {
-    falar(palavra.word, { rate: 0.8 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [palavra]);
+    try {
+      window.localStorage.setItem(RECORDE_KEY, String(recorde));
+    } catch {
+      // ignora erros de storage (ex.: navegação privada)
+    }
+  }, [recorde]);
 
-  useEffect(() => {
-    if (!falou || !emojiCerto) return;
-    setScore((s) => s + 1);
-    adicionarEstrelas("memoria", 1);
+  const mostrarSequencia = useCallback(async (seq: number[], padsAtuais: MemoryWord[]) => {
+    const id = ++execucaoRef.current;
+    setFase("mostrando");
+    setPasso(0);
+    setAceso(null);
+    await esperar(600);
+    for (const indice of seq) {
+      if (execucaoRef.current !== id) return;
+      setAceso(indice);
+      tocarTom(TONS_PADS[indice], 260, "triangle");
+      falar(padsAtuais[indice].word, { rate: 0.8 });
+      await esperar(900);
+      if (execucaoRef.current !== id) return;
+      setAceso(null);
+      await esperar(320);
+    }
+    if (execucaoRef.current !== id) return;
+    setFase("jogador");
+  }, []);
+
+  const comecar = () => {
+    const novosPads = sortearPads();
+    const seq = [Math.floor(Math.random() * QTD_PADS)];
+    setPads(novosPads);
+    setSequencia(seq);
+    setRodadasVencidas(0);
+    void mostrarSequencia(seq, novosPads);
+  };
+
+  const repetirSequencia = () => {
+    if (fase !== "jogador" || sequencia.length === 0) return;
+    void mostrarSequencia(sequencia, pads);
+  };
+
+  const acertouRodada = (seq: number[]) => {
+    tocarSucesso();
     confetti({
       particleCount: 100,
       spread: 75,
       origin: { y: 0.7 },
       colors: ["#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff", "#c77dff"],
     });
-    const t = setTimeout(() => {
-      const proxima = palavraAleatoria(palavra.id);
-      setPalavra(proxima);
-      setOpcoes(gerarOpcoes(proxima));
-      setFalou(false);
-      setEmojiCerto(false);
-    }, 1100);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [falou, emojiCerto]);
-
-  const ouvirEFalar = () => {
-    if (ouvindo) return;
-    falar(palavra.word, { rate: 0.8 });
-    setOuvindo(true);
-    const started = ouvir({
-      onResult: (transcript) => {
-        if (palavraCorresponde(transcript, palavra.word)) {
-          setFalou(true);
-          tocarSucesso();
-          toast("Boa! Falou certinho.", { icon: "🗣️" });
-        } else {
-          tocarErro();
-          toast("Quase! Vamos repetir.", { icon: "💪" });
-        }
-      },
-      onEnd: () => setOuvindo(false),
-    });
-    if (!started) {
-      setOuvindo(false);
-      setSemSuporte(true);
+    adicionarEstrelas("memoria", 1);
+    const vencidas = rodadasVencidas + 1;
+    setRodadasVencidas(vencidas);
+    if (vencidas > recorde) {
+      setRecorde(vencidas);
+      toast("Novo recorde de sequência!", { icon: "🏆" });
     }
+    setFase("mostrando");
+    const proxima = [...seq, Math.floor(Math.random() * QTD_PADS)];
+    setTimeout(() => {
+      setSequencia(proxima);
+      void mostrarSequencia(proxima, pads);
+    }, 1200);
   };
 
-  const escolherEmoji = (opcao: MemoryWord) => {
-    if (emojiCerto) return;
-    if (opcao.id === palavra.id) {
-      setEmojiCerto(true);
-      tocarSucesso();
+  const errou = () => {
+    tocarErro();
+    setFase("parado");
+    setAceso(null);
+    execucaoRef.current++;
+    toast("Ops! A sequência era outra. Vamos tentar de novo.", { icon: "💪" });
+  };
+
+  const tocarPad = (indice: number) => {
+    if (fase !== "jogador") return;
+    setAceso(indice);
+    tocarTom(TONS_PADS[indice], 240, "triangle");
+    falar(pads[indice].word, { rate: 0.9 });
+    setTimeout(() => setAceso((a) => (a === indice ? null : a)), 320);
+
+    if (sequencia[passo] !== indice) {
+      errou();
+      return;
+    }
+    const proximoPasso = passo + 1;
+    if (proximoPasso === sequencia.length) {
+      setPasso(0);
+      acertouRodada(sequencia);
     } else {
-      tocarErro();
-      toast("Esse não é! Tenta outro.", { icon: "🤔" });
+      setPasso(proximoPasso);
     }
   };
+
+  const rodada = sequencia.length;
+  const mensagem =
+    fase === "mostrando"
+      ? "Preste atenção na sequência..."
+      : fase === "jogador"
+        ? `Sua vez! Repita a sequência (${passo}/${rodada})`
+        : rodada > 0
+          ? "Toque em Começar para jogar outra vez."
+          : "Toque em Começar: eu falo as palavras e você repete na mesma ordem.";
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
@@ -115,80 +189,75 @@ function MemoryPage() {
         <div>
           <h1 className="text-3xl font-bold sm:text-4xl">Memória Auditiva</h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            Ouça a palavra, repita em voz alta e toque no emoji certo. Pode fazer nessa ordem ou na
-            outra!
+            Jogo estilo Genius: ouça a sequência de palavras e repita tocando nas imagens na mesma
+            ordem. A cada acerto entra mais uma palavra!
           </p>
-          {semSuporte && (
-            <p className="mt-2 rounded-xl bg-warm/30 px-3 py-2 text-sm">
-              Seu navegador não suporta reconhecimento de voz. Tente no Chrome do computador ou
-              celular.
-            </p>
-          )}
         </div>
-        <div className="flex items-center gap-2 rounded-2xl bg-card px-4 py-3 shadow-sm">
-          <Star className="h-6 w-6 fill-warm text-warm" />
-          <span className="text-xl font-bold">{score}</span>
-          <span className="text-sm text-muted-foreground">acertos</span>
+        <div className="flex gap-2">
+          <div className="flex items-center gap-2 rounded-2xl bg-card px-4 py-3 shadow-sm">
+            <Star className="h-6 w-6 fill-warm text-warm" />
+            <span className="text-xl font-bold">{rodadasVencidas}</span>
+            <span className="text-sm text-muted-foreground">rodadas</span>
+          </div>
+          <div className="flex items-center gap-2 rounded-2xl bg-card px-4 py-3 shadow-sm">
+            <Trophy className="h-6 w-6 text-success" />
+            <span className="text-xl font-bold">{recorde}</span>
+            <span className="text-sm text-muted-foreground">recorde</span>
+          </div>
         </div>
       </header>
 
       <Card className="p-6 text-center">
         <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Palavra da vez
+          {rodada > 0
+            ? `Sequência de ${rodada} ${rodada === 1 ? "palavra" : "palavras"}`
+            : "Pronto?"}
         </p>
-        <p className="mt-2 font-display text-4xl font-bold tracking-wide">{palavra.word}</p>
+        <p className="mt-2 font-display text-2xl font-bold">{mensagem}</p>
 
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           <Button
-            variant="outline"
-            onClick={() => falar(palavra.word, { rate: 0.8 })}
+            onClick={comecar}
+            disabled={fase === "mostrando"}
             className="h-12 rounded-2xl px-5 text-base"
           >
-            <Volume2 className="mr-2 h-5 w-5" /> Ouvir de novo
+            <Play className="mr-2 h-5 w-5" /> {rodada > 0 ? "Começar de novo" : "Começar"}
           </Button>
           <Button
-            onClick={ouvirEFalar}
-            disabled={ouvindo}
-            variant={falou ? "secondary" : "default"}
+            variant="outline"
+            onClick={repetirSequencia}
+            disabled={fase !== "jogador"}
             className="h-12 rounded-2xl px-5 text-base"
           >
-            {ouvindo ? (
-              <>
-                <Mic className="mr-2 h-5 w-5 animate-pulse text-red-500" /> Ouvindo...
-              </>
-            ) : falou ? (
-              <>
-                <Check className="mr-2 h-5 w-5" /> Falou certo!
-              </>
-            ) : (
-              <>
-                <Mic className="mr-2 h-5 w-5" /> Falar e verificar
-              </>
-            )}
+            <Volume2 className="mr-2 h-5 w-5" /> Ouvir a sequência
           </Button>
         </div>
 
-        <p className="mt-6 mb-3 text-base font-semibold">
-          {emojiCerto ? "✅ Emoji certo!" : "Qual emoji combina com a palavra?"}
-        </p>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {opcoes.map((op) => {
-            const correta = emojiCerto && op.id === palavra.id;
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {pads.map((p, i) => {
+            const ligado = aceso === i;
             return (
               <motion.button
-                key={op.id}
+                key={p.id}
                 whileTap={{ scale: 0.94 }}
-                onClick={() => escolherEmoji(op)}
-                disabled={emojiCerto}
+                animate={{ scale: ligado ? 1.06 : 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                onClick={() => tocarPad(i)}
+                disabled={fase !== "jogador"}
                 className={
-                  "big-tap flex h-24 items-center justify-center rounded-3xl border-2 text-5xl transition-all " +
-                  (correta
-                    ? "border-success bg-success/15"
-                    : "border-border bg-background hover:border-primary disabled:opacity-60")
+                  "big-tap flex h-36 flex-col items-center justify-center gap-1 rounded-3xl border-4 transition-colors disabled:opacity-70 " +
+                  (ligado ? "shadow-xl" : "bg-background")
                 }
-                aria-label={op.word}
+                style={{
+                  borderColor: CORES_PADS[i],
+                  background: ligado ? CORES_PADS[i] : undefined,
+                }}
+                aria-label={p.word}
               >
-                {op.emoji}
+                <span className="text-5xl" aria-hidden="true">
+                  {p.emoji}
+                </span>
+                <span className="font-display text-lg font-bold capitalize">{p.word}</span>
               </motion.button>
             );
           })}

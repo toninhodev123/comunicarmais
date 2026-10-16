@@ -29,8 +29,8 @@ export const Route = createFileRoute("/")({
 
 const shortcuts = [
   {
-    title: "Banco de Fonemas",
-    desc: "Treine sons como P, F, R, L.",
+    title: "Banco de Palavras",
+    desc: "Trocas e posição silábica dos sons.",
     url: "/fonemas",
     icon: Mic,
     color: "oklch(0.78 0.14 30)",
@@ -44,7 +44,7 @@ const shortcuts = [
   },
   {
     title: "Memória Auditiva",
-    desc: "Jogo de sons em sequência.",
+    desc: "Jogo estilo Genius com palavras e imagens.",
     url: "/memoria",
     icon: Brain,
     color: "oklch(0.78 0.13 145)",

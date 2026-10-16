@@ -25,4 +25,10 @@ export const memoryWords: MemoryWord[] = [
   { id: "chapeu", word: "chapéu", emoji: "👒" },
   { id: "maca", word: "maçã", emoji: "🍎" },
   { id: "coelho", word: "coelho", emoji: "🐰" },
+  { id: "foca", word: "foca", emoji: "🦭" },
+  { id: "lapis", word: "lápis", emoji: "✏️" },
+  { id: "navio", word: "navio", emoji: "🚢" },
+  { id: "vaca", word: "vaca", emoji: "🐮" },
+  { id: "cama", word: "cama", emoji: "🛏️" },
+  { id: "suco", word: "suco", emoji: "🥤" },
 ];

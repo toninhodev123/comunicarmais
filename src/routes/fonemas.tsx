@@ -20,8 +20,11 @@ import {
 export const Route = createFileRoute("/fonemas")({
   head: () => ({
     meta: [
-      { title: "Banco de Fonemas — Comunicar+" },
-      { name: "description", content: "Treine fonemas com palavras do cotidiano e pictogramas." },
+      { title: "Banco de Palavras — Trocas e Posição Silábica — Comunicar+" },
+      {
+        name: "description",
+        content: "Treine trocas de sons e a posição silábica com palavras do cotidiano.",
+      },
     ],
   }),
   component: PhonemesPage,
@@ -81,9 +84,10 @@ function PhonemesPage() {
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold sm:text-4xl">Banco de Fonemas</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">Banco de Palavras</h1>
+          <p className="text-lg font-semibold text-primary">Trocas e posição silábica</p>
           <p className="mt-2 text-lg text-muted-foreground">
-            Escolha um som, ouça e veja como mexer a boca.
+            Escolha um som, veja como mexer a boca e treine a palavra no início, no meio e no fim.
           </p>
           {semSuporte && (
             <p className="mt-2 rounded-xl bg-warm/30 px-3 py-2 text-sm">
