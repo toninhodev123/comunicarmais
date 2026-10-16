@@ -10,6 +10,15 @@ O app fala de duas maneiras, nesta ordem:
 O app publicado **não** chama nenhuma API de voz: ele só baixa os mp3. Toda a geração
 acontece na sua máquina, uma vez, e os arquivos entram no commit.
 
+## Gravando pelo GitHub (sem instalar nada)
+
+Em **Settings → Secrets and variables → Actions → New repository secret**, crie
+`ELEVENLABS_API_KEY` com a chave da sua conta. Depois vá em **Actions → Gerar
+áudios → Run workflow**, escolha o provedor e (opcional) o id da voz. O robô grava
+os mp3 e comita `public/audio/` + `src/lib/data/audios.ts` na branch escolhida.
+
+Com o provedor `edge` não precisa de chave nenhuma.
+
 ## Gravando os áudios
 
 São 459 áudios no total (~3.700 caracteres) — todas as palavras dos fonemas, o
