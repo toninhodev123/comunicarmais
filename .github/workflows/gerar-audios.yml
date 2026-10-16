@@ -27,6 +27,10 @@ on:
         description: Regravar os áudios que já existem
         type: boolean
         default: false
+      listar_vozes:
+        description: Só listar as vozes disponíveis (não grava nada)
+        type: boolean
+        default: false
 
 jobs:
   gravar:
@@ -50,9 +54,14 @@ jobs:
           VOZ: ${{ inputs.voz }}
           SO: ${{ inputs.so }}
           FORCAR: ${{ inputs.forcar }}
+          LISTAR: ${{ inputs.listar_vozes }}
         run: |
           set -euo pipefail
           args=("--provedor=$PROVEDOR")
+          if [ "$LISTAR" = "true" ]; then
+            bun run audio -- "${args[@]}" --listar-vozes
+            exit 0
+          fi
           [ -n "$VOZ" ] && args+=("--voz=$VOZ")
           [ "$SO" != "todos" ] && args+=("--so=$SO")
           [ "$FORCAR" = "true" ] && args+=("--forcar")

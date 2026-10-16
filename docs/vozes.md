@@ -36,6 +36,12 @@ bun run audio -- --provedor=elevenlabs --listar-vozes     # ids das suas vozes
 bun run audio -- --provedor=elevenlabs --voz=<id_da_voz>  # grava tudo
 ```
 
+> **Plano gratuito**: vozes da *Voice Library* (aquelas que você adiciona da
+> galeria da comunidade) não funcionam por API em conta grátis — a API responde
+> `402 paid_plan_required`. Rode com a opção **Só listar as vozes** no workflow
+> (ou `--listar-vozes`): as marcadas com `[$]` exigem plano pago; as demais,
+> normalmente as padrão da plataforma ("premade"), funcionam.
+
 Dicas:
 
 - Escolha uma voz treinada em português, ou crie uma no *Voice Design* descrevendo

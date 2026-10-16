@@ -87,6 +87,8 @@ function textosDoApp(): Texto[] {
 
 /** Chave recusada: insistir nos outros 459 textos não adianta. */
 class ErroDeChave extends Error {}
+/** Voz que o plano não libera por API — idem. */
+class ErroDePlano extends Error {}
 
 interface Provedor {
   nome: string;
@@ -148,6 +150,14 @@ async function provedorEleven(): Promise<Provedor> {
       );
       if (!resposta.ok) {
         const corpo = (await resposta.text()).slice(0, 300);
+        if (resposta.status === 402 || corpo.includes("paid_plan_required")) {
+          throw new ErroDePlano(
+            `A voz ${voz} não é liberada por API no seu plano do ElevenLabs. ` +
+              `Vozes da Voice Library só funcionam por API em plano pago; use uma voz padrão ` +
+              `(categoria "premade") — rode com --listar-vozes para ver quais são — ou grave ` +
+              `com --provedor=edge, que não tem essa limitação.\n${corpo}`,
+          );
+        }
         if (corpo.includes("invalid_api_key") || resposta.status === 401) {
           throw new ErroDeChave(
             `Chave recusada pelo ElevenLabs (HTTP ${resposta.status}). A chave guardada tem ` +
@@ -162,30 +172,47 @@ async function provedorEleven(): Promise<Provedor> {
   };
 }
 
-async function vozesEleven(chave: string) {
+interface VozEleven {
+  voice_id: string;
+  name: string;
+  /** "premade" (padrão da plataforma), "cloned", "generated", "professional"... */
+  category?: string;
+  labels?: Record<string, string>;
+}
+
+async function vozesEleven(chave: string): Promise<VozEleven[]> {
   const resposta = await fetch("https://api.elevenlabs.io/v2/voices?page_size=100", {
     headers: { "xi-api-key": chave },
   });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}: ${await resposta.text()}`);
-  const dados = (await resposta.json()) as {
-    voices: { voice_id: string; name: string; labels?: Record<string, string> }[];
-  };
+  const dados = (await resposta.json()) as { voices: VozEleven[] };
   return dados.voices ?? [];
+}
+
+/** Vozes da Voice Library exigem plano pago para uso por API. */
+function liberadaPorApi(v: VozEleven) {
+  return v.category !== "famous" && v.category !== "high_quality";
 }
 
 async function primeiraVozEleven(chave: string) {
   const vozes = await vozesEleven(chave);
   if (vozes.length === 0) throw new Error("Nenhuma voz na conta do ElevenLabs.");
-  console.log(`Nenhuma voz informada — usando "${vozes[0].name}" (${vozes[0].voice_id}).`);
-  return vozes[0].voice_id;
+  // Prefere uma voz padrão da plataforma: é a que o plano gratuito usa por API.
+  const escolhida = vozes.find((v) => v.category === "premade" && liberadaPorApi(v)) ?? vozes[0];
+  console.log(`Nenhuma voz informada — usando "${escolhida.name}" (${escolhida.voice_id}).`);
+  return escolhida.voice_id;
 }
 
 async function listarVozes(provedor: string) {
   if (provedor === "elevenlabs") {
     for (const v of await vozesEleven(chaveEleven())) {
       const rotulos = Object.values(v.labels ?? {}).join(", ");
-      console.log(`${v.voice_id}  ${v.name.padEnd(22)} ${rotulos}`);
+      const marca = liberadaPorApi(v) ? "   " : "[$]";
+      console.log(
+        `${marca} ${v.voice_id}  ${v.name.padEnd(22)} ${(v.category ?? "").padEnd(14)} ${rotulos}`,
+      );
     }
+    console.log("\n[$] = voz da Voice Library: por API, só em plano pago.");
     return;
   }
   const tts = new MsEdgeTTS();
@@ -235,7 +262,7 @@ async function gerar(nomeProvedor: string) {
     } catch (erro) {
       falhas++;
       console.error(`Falhou "${texto}":`, erro instanceof Error ? erro.message : erro);
-      if (erro instanceof ErroDeChave) break;
+      if (erro instanceof ErroDeChave || erro instanceof ErroDePlano) break;
       // Crédito no fim ou voz inválida: não adianta insistir mais 400 vezes.
       if (falhas >= 5) {
         console.error("Cinco falhas seguidas — parando. Confira a voz e os créditos.");
