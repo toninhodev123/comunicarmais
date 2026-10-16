@@ -33,7 +33,8 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+// O router tipa `error` como unknown — mantemos assim e só logamos o valor.
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     console.error(error);
@@ -122,7 +123,9 @@ function AppShell() {
   const { session, authCarregando } = useApp();
 
   if (authCarregando) {
-    return <div className="grid min-h-dvh place-items-center text-muted-foreground">Carregando…</div>;
+    return (
+      <div className="grid min-h-dvh place-items-center text-muted-foreground">Carregando…</div>
+    );
   }
 
   if (!session) {

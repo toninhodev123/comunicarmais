@@ -9,37 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as VocabularioRouteImport } from './routes/vocabulario'
-import { Route as PersonalizarRouteImport } from './routes/personalizar'
-import { Route as MemoriaRouteImport } from './routes/memoria'
-import { Route as HabilidadesSociaisRouteImport } from './routes/habilidades-sociais'
-import { Route as FonemasRouteImport } from './routes/fonemas'
-import { Route as DesafiosRouteImport } from './routes/desafios'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DesafiosRouteImport } from './routes/desafios'
+import { Route as FonemasRouteImport } from './routes/fonemas'
+import { Route as HabilidadesSociaisRouteImport } from './routes/habilidades-sociais'
+import { Route as MemoriaRouteImport } from './routes/memoria'
+import { Route as PersonalizarRouteImport } from './routes/personalizar'
+import { Route as VocabularioRouteImport } from './routes/vocabulario'
 
-const VocabularioRoute = VocabularioRouteImport.update({
-  id: '/vocabulario',
-  path: '/vocabulario',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PersonalizarRoute = PersonalizarRouteImport.update({
-  id: '/personalizar',
-  path: '/personalizar',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MemoriaRoute = MemoriaRouteImport.update({
-  id: '/memoria',
-  path: '/memoria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HabilidadesSociaisRoute = HabilidadesSociaisRouteImport.update({
-  id: '/habilidades-sociais',
-  path: '/habilidades-sociais',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FonemasRoute = FonemasRouteImport.update({
-  id: '/fonemas',
-  path: '/fonemas',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesafiosRoute = DesafiosRouteImport.update({
@@ -47,9 +27,29 @@ const DesafiosRoute = DesafiosRouteImport.update({
   path: '/desafios',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FonemasRoute = FonemasRouteImport.update({
+  id: '/fonemas',
+  path: '/fonemas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HabilidadesSociaisRoute = HabilidadesSociaisRouteImport.update({
+  id: '/habilidades-sociais',
+  path: '/habilidades-sociais',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoriaRoute = MemoriaRouteImport.update({
+  id: '/memoria',
+  path: '/memoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PersonalizarRoute = PersonalizarRouteImport.update({
+  id: '/personalizar',
+  path: '/personalizar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VocabularioRoute = VocabularioRouteImport.update({
+  id: '/vocabulario',
+  path: '/vocabulario',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -123,39 +123,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/vocabulario': {
-      id: '/vocabulario'
-      path: '/vocabulario'
-      fullPath: '/vocabulario'
-      preLoaderRoute: typeof VocabularioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/personalizar': {
-      id: '/personalizar'
-      path: '/personalizar'
-      fullPath: '/personalizar'
-      preLoaderRoute: typeof PersonalizarRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/memoria': {
-      id: '/memoria'
-      path: '/memoria'
-      fullPath: '/memoria'
-      preLoaderRoute: typeof MemoriaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/habilidades-sociais': {
-      id: '/habilidades-sociais'
-      path: '/habilidades-sociais'
-      fullPath: '/habilidades-sociais'
-      preLoaderRoute: typeof HabilidadesSociaisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fonemas': {
-      id: '/fonemas'
-      path: '/fonemas'
-      fullPath: '/fonemas'
-      preLoaderRoute: typeof FonemasRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/desafios': {
@@ -165,11 +137,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DesafiosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/fonemas': {
+      id: '/fonemas'
+      path: '/fonemas'
+      fullPath: '/fonemas'
+      preLoaderRoute: typeof FonemasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/habilidades-sociais': {
+      id: '/habilidades-sociais'
+      path: '/habilidades-sociais'
+      fullPath: '/habilidades-sociais'
+      preLoaderRoute: typeof HabilidadesSociaisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memoria': {
+      id: '/memoria'
+      path: '/memoria'
+      fullPath: '/memoria'
+      preLoaderRoute: typeof MemoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/personalizar': {
+      id: '/personalizar'
+      path: '/personalizar'
+      fullPath: '/personalizar'
+      preLoaderRoute: typeof PersonalizarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vocabulario': {
+      id: '/vocabulario'
+      path: '/vocabulario'
+      fullPath: '/vocabulario'
+      preLoaderRoute: typeof VocabularioRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
