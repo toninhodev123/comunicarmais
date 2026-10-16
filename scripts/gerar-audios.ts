@@ -85,6 +85,9 @@ function textosDoApp(): Texto[] {
 
 // ---------------------------------------------------------------- provedores
 
+/** Chave recusada: insistir nos outros 459 textos não adianta. */
+class ErroDeChave extends Error {}
+
 interface Provedor {
   nome: string;
   voz: string;
@@ -145,8 +148,12 @@ async function provedorEleven(): Promise<Provedor> {
       );
       if (!resposta.ok) {
         const corpo = (await resposta.text()).slice(0, 300);
-        if (resposta.status === 400 || resposta.status === 401) {
-          throw new Error(`Chave recusada pelo ElevenLabs (HTTP ${resposta.status}): ${corpo}`);
+        if (corpo.includes("invalid_api_key") || resposta.status === 401) {
+          throw new ErroDeChave(
+            `Chave recusada pelo ElevenLabs (HTTP ${resposta.status}). A chave guardada tem ` +
+              `${chave.length} caracteres. Recadastre o secret ELEVENLABS_API_KEY colando ` +
+              `apenas a chave, sem espaços nem caracteres extras.\n${corpo}`,
+          );
         }
         throw new Error(`HTTP ${resposta.status}: ${corpo}`);
       }
@@ -228,9 +235,10 @@ async function gerar(nomeProvedor: string) {
     } catch (erro) {
       falhas++;
       console.error(`Falhou "${texto}":`, erro instanceof Error ? erro.message : erro);
-      // Chave inválida ou crédito no fim: não adianta insistir mais 400 vezes.
+      if (erro instanceof ErroDeChave) break;
+      // Crédito no fim ou voz inválida: não adianta insistir mais 400 vezes.
       if (falhas >= 5) {
-        console.error("Cinco falhas seguidas — parando. Confira a chave, a voz e os créditos.");
+        console.error("Cinco falhas seguidas — parando. Confira a voz e os créditos.");
         break;
       }
     }
@@ -238,6 +246,16 @@ async function gerar(nomeProvedor: string) {
 
   await escreverLista();
   console.log(`Pronto: ${gravados} gravados, ${pulados} já existiam, ${falhas} falharam.`);
+
+  // Sem isso o job termina verde mesmo sem gravar nada — e o erro passa batido.
+  if (falhas > 0) {
+    console.error(
+      gravados === 0
+        ? "Nenhum áudio foi gravado. Veja o erro acima — nada foi alterado no repositório."
+        : `${falhas} texto(s) não foram gravados. Rode de novo para completar.`,
+    );
+    process.exitCode = 1;
+  }
 }
 
 /** Reescreve src/lib/data/audios.ts a partir do que está em public/audio. */
