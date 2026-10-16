@@ -1,17 +1,100 @@
 // Funções de apoio sobre a Web Speech API do navegador (texto-em-fala e
 // reconhecimento de fala), usadas pelo microfone em todas as atividades.
 
+const VOZ_STORAGE_KEY = "comunicar-plus:voz";
+
+/** Pedaços de nome que marcam as vozes mais naturais de cada sistema. */
+const VOZES_NATURAIS = [
+  "natural",
+  "neural",
+  "online",
+  "premium",
+  "enhanced",
+  "google",
+  "francisca",
+  "thalita",
+  "luciana",
+  "camila",
+  "vitoria",
+  "vitória",
+];
+const VOZES_ROBOTICAS = ["espeak", "compact", "pico", "festival"];
+
+/** Avisa quando o navegador terminar de carregar a lista de vozes. */
+export function aoCarregarVozes(callback: () => void): () => void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return () => {};
+  const sintese = window.speechSynthesis;
+  sintese.onvoiceschanged = callback;
+  // Alguns navegadores já têm a lista pronta e nunca disparam o evento.
+  if (sintese.getVoices().length > 0) callback();
+  return () => {
+    if (sintese.onvoiceschanged === callback) sintese.onvoiceschanged = null;
+  };
+}
+
+export function vozesPortugues(): SpeechSynthesisVoice[] {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return [];
+  try {
+    return window.speechSynthesis
+      .getVoices()
+      .filter((v) => v.lang.toLowerCase().startsWith("pt"))
+      .sort((a, b) => pontuarVoz(b) - pontuarVoz(a));
+  } catch {
+    return [];
+  }
+}
+
+// Quanto maior a nota, mais natural tende a ser a voz: pt-BR na frente,
+// vozes "natural/neural/online" valem muito e as sintéticas antigas perdem.
+function pontuarVoz(v: SpeechSynthesisVoice) {
+  const nome = v.name.toLowerCase();
+  let nota = 0;
+  if (v.lang.toLowerCase().replace("_", "-") === "pt-br") nota += 10;
+  if (VOZES_NATURAIS.some((p) => nome.includes(p))) nota += 20;
+  if (VOZES_ROBOTICAS.some((p) => nome.includes(p))) nota -= 20;
+  if (!v.localService) nota += 5; // vozes de servidor costumam ser as melhores
+  return nota;
+}
+
+export function vozPreferida(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(VOZ_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function definirVozPreferida(nome: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (nome) window.localStorage.setItem(VOZ_STORAGE_KEY, nome);
+    else window.localStorage.removeItem(VOZ_STORAGE_KEY);
+  } catch {
+    // ignora erros de storage (ex.: navegação privada)
+  }
+}
+
+function escolherVoz(): SpeechSynthesisVoice | undefined {
+  const vozes = vozesPortugues();
+  if (vozes.length === 0) return undefined;
+  const salva = vozPreferida();
+  return vozes.find((v) => v.name === salva) ?? vozes[0];
+}
+
 export function falar(texto: string, opcoes: { rate?: number; pitch?: number } = {}) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(texto);
     u.lang = "pt-BR";
-    u.rate = opcoes.rate ?? 0.9;
-    u.pitch = opcoes.pitch ?? 1;
-    const vozes = window.speechSynthesis.getVoices();
-    const vozPt = vozes.find((v) => v.lang.startsWith("pt"));
-    if (vozPt) u.voice = vozPt;
+    u.rate = opcoes.rate ?? 0.95;
+    u.pitch = opcoes.pitch ?? 1.05;
+    const voz = escolherVoz();
+    if (voz) {
+      u.voice = voz;
+      u.lang = voz.lang;
+    }
     window.speechSynthesis.speak(u);
   } catch {
     /* ignore */
@@ -51,16 +134,28 @@ export function tocarErro() {
 
 interface SpeechRecognitionLike {
   lang: string;
+  continuous: boolean;
   interimResults: boolean;
   maxAlternatives: number;
-  onresult:
-    | ((event: { results: { [i: number]: { [j: number]: { transcript: string } } } }) => void)
-    | null;
+  onresult: ((event: SpeechResultEventLike) => void) | null;
   onerror: (() => void) | null;
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
 }
+
+interface SpeechResultEventLike {
+  resultIndex: number;
+  results: {
+    length: number;
+    [i: number]: { isFinal: boolean; length: number; [j: number]: { transcript: string } };
+  };
+}
+
+/** Tempo máximo de escuta, para o microfone nunca ficar ligado à toa. */
+const LIMITE_ESCUTA_MS = 20000;
+/** Silêncio depois de falar que encerra a escuta e manda conferir. */
+const PAUSA_FINAL_MS = 1800;
 
 // Liga o microfone para ouvir uma fala e verificar depois se bate com a
 // palavra/frase esperada. Retorna false se o navegador não suportar.
@@ -80,14 +175,52 @@ export function ouvir(opcoes: {
   try {
     const recognition = new SpeechRecognitionCtor();
     recognition.lang = "pt-BR";
-    recognition.interimResults = false;
+    // Frases longas saem em pedaços: juntamos tudo e só conferimos no fim,
+    // senão a primeira pausa no meio do trava-língua já reprovava a tentativa.
+    recognition.continuous = true;
+    recognition.interimResults = true;
     recognition.maxAlternatives = 1;
+
+    let finalizado = "";
+    let parcial = "";
+    let silencio: ReturnType<typeof setTimeout> | null = null;
+    const pararPorSilencio = () => {
+      if (silencio) clearTimeout(silencio);
+      silencio = setTimeout(() => {
+        try {
+          recognition.stop();
+        } catch {
+          /* ignore */
+        }
+      }, PAUSA_FINAL_MS);
+    };
+
     recognition.onresult = (event) => {
-      const transcricao = event.results?.[0]?.[0]?.transcript ?? "";
-      opcoes.onResult(transcricao);
+      parcial = "";
+      pararPorSilencio();
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const resultado = event.results[i];
+        const texto = resultado?.[0]?.transcript ?? "";
+        if (resultado?.isFinal) finalizado += " " + texto;
+        else parcial += " " + texto;
+      }
     };
     recognition.onerror = () => opcoes.onError?.();
-    recognition.onend = () => opcoes.onEnd?.();
+
+    const limite = setTimeout(() => {
+      try {
+        recognition.stop();
+      } catch {
+        /* ignore */
+      }
+    }, LIMITE_ESCUTA_MS);
+
+    recognition.onend = () => {
+      clearTimeout(limite);
+      if (silencio) clearTimeout(silencio);
+      opcoes.onResult((finalizado + " " + parcial).trim());
+      opcoes.onEnd?.();
+    };
     recognition.start();
     return true;
   } catch {
@@ -112,19 +245,34 @@ export function palavraCorresponde(transcricao: string, alvo: string) {
 }
 
 function normalizarTexto(texto: string) {
-  return texto
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    texto
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      // "batata-doce" vira duas palavras, que é como o microfone devolve.
+      .replace(/-/g, " ")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
-// Confere uma frase inteira palavra por palavra: cada ocorrência de cada
-// palavra alvo precisa aparecer no que foi ouvido (palavras repetidas contam
-// cada vez), então errar até a última palavra faz a verificação falhar.
-export function fraseCorresponde(transcricao: string, alvo: string, limite = 1) {
+// Em frases longas o reconhecimento quase sempre perde uma palavrinha ("o",
+// "a", "pro"), então exigir 100% trava o exercício. A tolerância cresce com o
+// tamanho da frase: até 3 palavras precisa de tudo; acima disso liberamos
+// cerca de uma palavra a cada seis, sempre pedindo no mínimo 75% de acerto.
+export function limiteDaFrase(alvo: string) {
+  const total = normalizarTexto(alvo).split(" ").filter(Boolean).length;
+  if (total <= 3) return 1;
+  const perdoadas = Math.max(1, Math.round(total / 6));
+  return Math.max(0.75, (total - perdoadas) / total);
+}
+
+// Confere uma frase palavra por palavra: cada ocorrência de cada palavra alvo
+// precisa aparecer no que foi ouvido (palavras repetidas contam cada vez) e o
+// acerto precisa alcançar `limite` do total.
+export function fraseCorresponde(transcricao: string, alvo: string, limite = limiteDaFrase(alvo)) {
   const palavrasAlvo = normalizarTexto(alvo).split(" ").filter(Boolean);
   if (palavrasAlvo.length === 0) return false;
   const palavrasOuvidas = normalizarTexto(transcricao).split(" ").filter(Boolean);

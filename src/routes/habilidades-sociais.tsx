@@ -55,7 +55,10 @@ function SocialSkillsPage() {
           comemorar(p.id);
         } else {
           tocarErro();
-          toast("Quase! Vamos repetir até acertar.", { icon: "💪" });
+          toast(
+            transcript ? `Ouvi: "${transcript}". Vamos de novo!` : "Não ouvi nada. Tenta de novo!",
+            { icon: "💪" },
+          );
         }
       },
       onEnd: () => setListeningId(null),
