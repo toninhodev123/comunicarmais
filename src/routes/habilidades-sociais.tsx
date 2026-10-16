@@ -50,6 +50,7 @@ function SocialSkillsPage() {
     if (listeningId) return;
     setListeningId(p.id);
     const started = ouvir({
+      aceitar: (ouvido) => fraseCorresponde(ouvido, p.text),
       onResult: (transcript) => {
         if (fraseCorresponde(transcript, p.text)) {
           comemorar(p.id);

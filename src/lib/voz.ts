@@ -1,5 +1,32 @@
-// Funções de apoio sobre a Web Speech API do navegador (texto-em-fala e
-// reconhecimento de fala), usadas pelo microfone em todas as atividades.
+// Funções de apoio para a fala do app: primeiro tentamos o áudio gravado
+// com voz neural (public/audio, gerado por `bun run audio`); se a frase não
+// tiver gravação, caímos na voz do próprio navegador (Web Speech API). O
+// reconhecimento de fala do microfone também mora aqui.
+
+import { audiosDisponiveis } from "@/lib/data/audios";
+
+/** Nome do arquivo de áudio correspondente a um texto. */
+export function slugDeTexto(texto: string) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+export function temAudioGravado(texto: string) {
+  return audiosDisponiveis.has(slugDeTexto(texto));
+}
+
+let audioAtual: HTMLAudioElement | null = null;
+
+function pararAudio() {
+  if (!audioAtual) return;
+  audioAtual.pause();
+  audioAtual = null;
+}
 
 const VOZ_STORAGE_KEY = "comunicar-plus:voz";
 
@@ -83,6 +110,27 @@ function escolherVoz(): SpeechSynthesisVoice | undefined {
 }
 
 export function falar(texto: string, opcoes: { rate?: number; pitch?: number } = {}) {
+  if (typeof window === "undefined") return;
+  pararAudio();
+  // Áudio gravado: voz neural igual em qualquer aparelho.
+  if (temAudioGravado(texto)) {
+    try {
+      const audio = new Audio(`/audio/${slugDeTexto(texto)}.mp3`);
+      // Mantém o tom ao desacelerar, em vez de virar voz de desenho animado.
+      audio.preservesPitch = true;
+      audio.playbackRate = Math.min(2, Math.max(0.5, opcoes.rate ?? 1));
+      audio.onerror = () => falarComNavegador(texto, opcoes);
+      audioAtual = audio;
+      void audio.play().catch(() => falarComNavegador(texto, opcoes));
+      return;
+    } catch {
+      /* cai para a voz do navegador */
+    }
+  }
+  falarComNavegador(texto, opcoes);
+}
+
+function falarComNavegador(texto: string, opcoes: { rate?: number; pitch?: number } = {}) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();
@@ -155,12 +203,18 @@ interface SpeechResultEventLike {
 /** Tempo máximo de escuta, para o microfone nunca ficar ligado à toa. */
 const LIMITE_ESCUTA_MS = 20000;
 /** Silêncio depois de falar que encerra a escuta e manda conferir. */
-const PAUSA_FINAL_MS = 1800;
+const PAUSA_FINAL_MS = 900;
 
 // Liga o microfone para ouvir uma fala e verificar depois se bate com a
 // palavra/frase esperada. Retorna false se o navegador não suportar.
 export function ouvir(opcoes: {
   onResult: (transcricao: string) => void;
+  /**
+   * Confere o que já foi ouvido enquanto a pessoa ainda fala. Assim que
+   * devolve true a escuta encerra na hora — é o que faz o "Consegui!"
+   * aparecer no mesmo instante em que a frase termina.
+   */
+  aceitar?: (parcial: string) => boolean;
   onError?: () => void;
   onEnd?: () => void;
 }): boolean {
@@ -184,36 +238,38 @@ export function ouvir(opcoes: {
     let finalizado = "";
     let parcial = "";
     let silencio: ReturnType<typeof setTimeout> | null = null;
+    let encerrando = false;
+    const encerrar = () => {
+      if (encerrando) return;
+      encerrando = true;
+      if (silencio) clearTimeout(silencio);
+      try {
+        recognition.stop();
+      } catch {
+        /* ignore */
+      }
+    };
+
     const pararPorSilencio = () => {
       if (silencio) clearTimeout(silencio);
-      silencio = setTimeout(() => {
-        try {
-          recognition.stop();
-        } catch {
-          /* ignore */
-        }
-      }, PAUSA_FINAL_MS);
+      silencio = setTimeout(encerrar, PAUSA_FINAL_MS);
     };
 
     recognition.onresult = (event) => {
       parcial = "";
-      pararPorSilencio();
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const resultado = event.results[i];
         const texto = resultado?.[0]?.transcript ?? "";
         if (resultado?.isFinal) finalizado += " " + texto;
         else parcial += " " + texto;
       }
+      const ouvido = (finalizado + " " + parcial).trim();
+      if (opcoes.aceitar?.(ouvido)) encerrar();
+      else pararPorSilencio();
     };
     recognition.onerror = () => opcoes.onError?.();
 
-    const limite = setTimeout(() => {
-      try {
-        recognition.stop();
-      } catch {
-        /* ignore */
-      }
-    }, LIMITE_ESCUTA_MS);
+    const limite = setTimeout(encerrar, LIMITE_ESCUTA_MS);
 
     recognition.onend = () => {
       clearTimeout(limite);

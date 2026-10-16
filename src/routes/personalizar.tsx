@@ -174,9 +174,10 @@ function SecaoVoz() {
     <section className="mb-8">
       <h2 className="mb-3 text-xl font-bold">Voz do aplicativo</h2>
       <p className="mb-3 text-sm text-muted-foreground">
-        As vozes vêm do seu aparelho — as marcadas como <strong>Natural</strong>,{" "}
-        <strong>Neural</strong> ou <strong>Google</strong> são as menos robóticas. Toque em uma para
-        ouvir e já deixar escolhida.
+        Quando uma palavra ou frase tem áudio gravado (voz neural, igual em qualquer aparelho), o
+        app usa a gravação. A voz abaixo é a reserva, usada no que ainda não foi gravado — as
+        marcadas como <strong>Natural</strong>, <strong>Neural</strong> ou <strong>Google</strong>{" "}
+        são as menos robóticas. Toque em uma para ouvir e já deixar escolhida.
       </p>
       {vozes.length === 0 ? (
         <p className="rounded-xl bg-warm/30 px-3 py-2 text-sm">

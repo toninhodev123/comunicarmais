@@ -152,6 +152,7 @@ function ChallengesPage() {
     setListeningId(t.id);
     iniciarCrono(t.id, true);
     const started = ouvir({
+      aceitar: (ouvido) => fraseCorresponde(ouvido, t.text),
       onResult: (transcript) => {
         if (fraseCorresponde(transcript, t.text)) {
           comemorar(t.id);
