@@ -24,7 +24,7 @@ export const Route = createFileRoute("/memoria")({
 });
 
 /** Quantos botões ficam na mesa — cada um é uma palavra com a imagem dela. */
-const QTD_PADS = 4;
+const QTD_PADS = 6;
 const RECORDE_KEY = "comunicar-plus:recorde-memoria";
 
 const CORES_PADS = [
@@ -32,8 +32,10 @@ const CORES_PADS = [
   "oklch(0.78 0.13 145)",
   "oklch(0.78 0.13 240)",
   "oklch(0.78 0.13 300)",
+  "oklch(0.78 0.13 80)",
+  "oklch(0.78 0.13 200)",
 ];
-const TONS_PADS = [330, 392, 494, 587];
+const TONS_PADS = [330, 392, 440, 494, 587, 659];
 
 type Fase = "parado" | "mostrando" | "jogador";
 
@@ -48,6 +50,15 @@ function embaralhar<T>(arr: T[]): T[] {
 
 function sortearPads(): MemoryWord[] {
   return embaralhar(memoryWords).slice(0, QTD_PADS);
+}
+
+// Sorteia o próximo passo evitando repetir o botão anterior: sequências como
+// "peixe, peixe, peixe" soam iguais e não exercitam a memória.
+function proximoPasso(seq: number[]): number {
+  const anterior = seq.length > 0 ? seq[seq.length - 1] : -1;
+  const opcoes = [];
+  for (let i = 0; i < QTD_PADS; i++) if (i !== anterior) opcoes.push(i);
+  return opcoes[Math.floor(Math.random() * opcoes.length)];
 }
 
 function esperar(ms: number) {
@@ -96,13 +107,12 @@ function MemoryPage() {
     await esperar(600);
     for (const indice of seq) {
       if (execucaoRef.current !== id) return;
-      setAceso(indice);
+      // Nada acende aqui de propósito: a sequência é só de ouvido.
       tocarTom(TONS_PADS[indice], 260, "triangle");
-      falar(padsAtuais[indice].word, { rate: 0.8 });
-      await esperar(900);
+      falar(padsAtuais[indice].word, { rate: 0.85 });
+      await esperar(1100);
       if (execucaoRef.current !== id) return;
-      setAceso(null);
-      await esperar(320);
+      await esperar(260);
     }
     if (execucaoRef.current !== id) return;
     setFase("jogador");
@@ -110,7 +120,7 @@ function MemoryPage() {
 
   const comecar = () => {
     const novosPads = sortearPads();
-    const seq = [Math.floor(Math.random() * QTD_PADS)];
+    const seq = [proximoPasso([])];
     setPads(novosPads);
     setSequencia(seq);
     setRodadasVencidas(0);
@@ -138,7 +148,7 @@ function MemoryPage() {
       toast("Novo recorde de sequência!", { icon: "🏆" });
     }
     setFase("mostrando");
-    const proxima = [...seq, Math.floor(Math.random() * QTD_PADS)];
+    const proxima = [...seq, proximoPasso(seq)];
     setTimeout(() => {
       setSequencia(proxima);
       void mostrarSequencia(proxima, pads);
@@ -164,19 +174,19 @@ function MemoryPage() {
       errou();
       return;
     }
-    const proximoPasso = passo + 1;
-    if (proximoPasso === sequencia.length) {
+    const avanco = passo + 1;
+    if (avanco === sequencia.length) {
       setPasso(0);
       acertouRodada(sequencia);
     } else {
-      setPasso(proximoPasso);
+      setPasso(avanco);
     }
   };
 
   const rodada = sequencia.length;
   const mensagem =
     fase === "mostrando"
-      ? "Preste atenção na sequência..."
+      ? "Fecha os olhos e escuta a sequência..."
       : fase === "jogador"
         ? `Sua vez! Repita a sequência (${passo}/${rodada})`
         : rodada > 0
@@ -189,8 +199,8 @@ function MemoryPage() {
         <div>
           <h1 className="text-3xl font-bold sm:text-4xl">Memória Auditiva</h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            Jogo estilo Genius: ouça a sequência de palavras e repita tocando nas imagens na mesma
-            ordem. A cada acerto entra mais uma palavra!
+            Jogo estilo Genius só de ouvido: a sequência é falada, sem nenhuma pista na tela. Repita
+            tocando nas imagens na mesma ordem — a cada acerto entra mais uma palavra!
           </p>
         </div>
         <div className="flex gap-2">
@@ -233,7 +243,7 @@ function MemoryPage() {
           </Button>
         </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {pads.map((p, i) => {
             const ligado = aceso === i;
             return (

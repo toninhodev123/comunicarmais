@@ -56,6 +56,7 @@ function PhonemesPage() {
     if (listeningWord) return;
     setListeningWord(word);
     const started = ouvir({
+      aceitar: (ouvido) => palavraCorresponde(ouvido, word),
       onResult: (transcript) => {
         if (palavraCorresponde(transcript, word)) {
           acertou(word);

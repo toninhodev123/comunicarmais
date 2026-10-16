@@ -1,0 +1,72 @@
+# Grava os áudios do app (voz neural) e comita os mp3 na própria branch.
+# Rode em Actions -> "Gerar áudios" -> Run workflow.
+#
+# Para usar o ElevenLabs, cadastre a chave em
+# Settings -> Secrets and variables -> Actions -> New repository secret
+# com o nome ELEVENLABS_API_KEY. O provedor "edge" não precisa de chave.
+name: Gerar áudios
+
+on:
+  workflow_dispatch:
+    inputs:
+      provedor:
+        description: De onde vem a voz
+        type: choice
+        options: [elevenlabs, edge]
+        default: elevenlabs
+      voz:
+        description: "Id da voz (ElevenLabs) ou nome (ex.: pt-BR-AntonioNeural). Vazio = primeira da conta / padrão"
+        type: string
+        required: false
+      so:
+        description: Quais textos gravar
+        type: choice
+        options: [todos, frases, palavras]
+        default: todos
+      forcar:
+        description: Regravar os áudios que já existem
+        type: boolean
+        default: false
+
+jobs:
+  gravar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.2.23"
+
+      - run: bun install --frozen-lockfile
+
+      - name: Gravar os áudios
+        env:
+          # Entram como variáveis para não virarem texto dentro do comando.
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          PROVEDOR: ${{ inputs.provedor }}
+          VOZ: ${{ inputs.voz }}
+          SO: ${{ inputs.so }}
+          FORCAR: ${{ inputs.forcar }}
+        run: |
+          set -euo pipefail
+          args=("--provedor=$PROVEDOR")
+          [ -n "$VOZ" ] && args+=("--voz=$VOZ")
+          [ "$SO" != "todos" ] && args+=("--so=$SO")
+          [ "$FORCAR" = "true" ] && args+=("--forcar")
+          bun run audio -- "${args[@]}"
+
+      - name: Comitar o que foi gravado
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- public/audio src/lib/data/audios.ts; then
+            echo "Nenhum áudio novo — nada a comitar."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/audio src/lib/data/audios.ts
+          git commit -m "Grava audios do app (${{ inputs.provedor }})"
+          git push

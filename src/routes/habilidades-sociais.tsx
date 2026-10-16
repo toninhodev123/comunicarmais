@@ -50,12 +50,16 @@ function SocialSkillsPage() {
     if (listeningId) return;
     setListeningId(p.id);
     const started = ouvir({
+      aceitar: (ouvido) => fraseCorresponde(ouvido, p.text),
       onResult: (transcript) => {
         if (fraseCorresponde(transcript, p.text)) {
           comemorar(p.id);
         } else {
           tocarErro();
-          toast("Quase! Vamos repetir até acertar.", { icon: "💪" });
+          toast(
+            transcript ? `Ouvi: "${transcript}". Vamos de novo!` : "Não ouvi nada. Tenta de novo!",
+            { icon: "💪" },
+          );
         }
       },
       onEnd: () => setListeningId(null),

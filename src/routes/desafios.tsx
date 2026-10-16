@@ -84,11 +84,23 @@ function ChallengesPage() {
     }
   }, [melhores]);
 
-  const iniciarCrono = (id: string) => {
+  // Só um cronômetro corre por vez: ao começar um, os outros pausam onde
+  // estavam. `reiniciar` zera a contagem — é o que o botão de falar faz.
+  const iniciarCrono = (id: string, reiniciar = false) => {
     setCronos((c) => {
+      const agora = Date.now();
+      const novos: Record<string, Crono> = {};
+      for (const [outroId, outro] of Object.entries(c)) {
+        novos[outroId] =
+          outroId === id || outro.inicio === null
+            ? outro
+            : { inicio: null, acumulado: decorrido(outro, agora) };
+      }
       const atual = c[id] ?? CRONO_ZERADO;
-      if (atual.inicio !== null) return c;
-      return { ...c, [id]: { ...atual, inicio: Date.now() } };
+      if (reiniciar) novos[id] = { inicio: agora, acumulado: 0 };
+      else if (atual.inicio === null) novos[id] = { ...atual, inicio: agora };
+      else novos[id] = atual;
+      return novos;
     });
   };
 
@@ -138,14 +150,20 @@ function ChallengesPage() {
   const ouvirEVerificar = (t: (typeof tongueTwisters)[number]) => {
     if (listeningId) return;
     setListeningId(t.id);
-    iniciarCrono(t.id);
+    iniciarCrono(t.id, true);
     const started = ouvir({
+      aceitar: (ouvido) => fraseCorresponde(ouvido, t.text),
       onResult: (transcript) => {
         if (fraseCorresponde(transcript, t.text)) {
           comemorar(t.id);
         } else {
           tocarErro();
-          toast("Quase! Vamos repetir até acertar.", { icon: "💪" });
+          toast(
+            transcript ? `Ouvi: "${transcript}". Vamos de novo!` : "Não ouvi nada. Tenta de novo!",
+            {
+              icon: "💪",
+            },
+          );
         }
       },
       onEnd: () => setListeningId(null),
