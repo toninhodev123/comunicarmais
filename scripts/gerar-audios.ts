@@ -35,6 +35,8 @@ import { socialPhrases } from "../src/lib/data/socialSkills";
 import { memoryWords } from "../src/lib/data/memoryWords";
 import { slugDeTexto } from "../src/lib/voz";
 
+const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const RAIZ = path.resolve(import.meta.dirname, "..");
 const PASTA_AUDIO = path.join(RAIZ, "public", "audio");
 const BANCO_PADRAO = "padrao";
@@ -102,13 +104,37 @@ interface Provedor {
   encerrar?: () => void;
 }
 
+/**
+ * Conecta ao Edge TTS, repetindo quando o handshake cai (o serviço recusa de
+ * vez em quando com "Expected 101 status code" e, no Bun, a biblioteca não
+ * consegue fazer sozinha a correção de relógio que trataria isso).
+ */
+async function conectarEdge(voz: string) {
+  let ultimoErro: unknown;
+  for (let tentativa = 1; tentativa <= 5; tentativa++) {
+    try {
+      const tts = new MsEdgeTTS();
+      await tts.setMetadata(voz, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+      return tts;
+    } catch (erro) {
+      ultimoErro = erro;
+      if (tentativa < 5) {
+        console.log(`  conexão com o Edge falhou (tentativa ${tentativa}), tentando de novo...`);
+        await esperar(2000 * tentativa);
+      }
+    }
+  }
+  throw new Error(
+    `Não consegui conectar ao Edge TTS: ${ultimoErro instanceof Error ? ultimoErro.message : ultimoErro}`,
+  );
+}
+
 async function provedorEdge(): Promise<Provedor> {
   const voz = argumento("voz") ?? VOZ_EDGE_PADRAO;
   // Um tiquinho mais devagar que o normal: fica mais fácil de acompanhar.
   const ritmo = Number(argumento("ritmo") ?? 0.92);
   if (!Number.isFinite(ritmo) || ritmo <= 0) throw new Error(`Ritmo inválido: ${ritmo}`);
-  const tts = new MsEdgeTTS();
-  await tts.setMetadata(voz, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+  let tts = await conectarEdge(voz);
   return {
     nome: "Edge (Microsoft)",
     voz,
@@ -117,15 +143,28 @@ async function provedorEdge(): Promise<Provedor> {
       const seguro = texto.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       // toFile() grava "audio.mp3" dentro de uma pasta; aqui queremos o nome
       // exato do arquivo, então juntamos o stream e escrevemos nós mesmos.
-      const { audioStream } = tts.toStream(seguro, { rate: ritmo });
-      const pedacos: Buffer[] = [];
-      await new Promise<void>((resolve, reject) => {
-        audioStream.on("data", (parte: Buffer) => pedacos.push(Buffer.from(parte)));
-        audioStream.on("close", resolve);
-        audioStream.on("error", reject);
-      });
-      if (pedacos.length === 0) throw new Error("o servidor não devolveu áudio");
-      await writeFile(`${destino}.mp3`, Buffer.concat(pedacos));
+      const sintetizar = async () => {
+        const { audioStream } = tts.toStream(seguro, { rate: ritmo });
+        const pedacos: Buffer[] = [];
+        await new Promise<void>((resolve, reject) => {
+          audioStream.on("data", (parte: Buffer) => pedacos.push(Buffer.from(parte)));
+          audioStream.on("close", resolve);
+          audioStream.on("error", reject);
+        });
+        if (pedacos.length === 0) throw new Error("o servidor não devolveu áudio");
+        return Buffer.concat(pedacos);
+      };
+
+      let audio: Buffer;
+      try {
+        audio = await sintetizar();
+      } catch {
+        // Conexão caiu no meio de um lote longo: reconecta e tenta de novo.
+        tts.close();
+        tts = await conectarEdge(voz);
+        audio = await sintetizar();
+      }
+      await writeFile(`${destino}.mp3`, audio);
     },
     encerrar: () => tts.close(),
   };
@@ -274,6 +313,7 @@ async function gerar(nomeProvedor: string) {
   let gravados = 0;
   let pulados = 0;
   let falhas = 0;
+  let falhasSeguidas = 0;
   for (const [i, { texto }] of textos.entries()) {
     const slug = slugDeTexto(texto);
     const destino = path.join(pastaBanco, slug);
@@ -284,13 +324,15 @@ async function gerar(nomeProvedor: string) {
     try {
       await provedor.gravar(texto, destino);
       gravados++;
+      falhasSeguidas = 0;
       if (gravados % 25 === 0) console.log(`  ${i + 1}/${textos.length}...`);
     } catch (erro) {
       falhas++;
+      falhasSeguidas++;
       console.error(`Falhou "${texto}":`, erro instanceof Error ? erro.message : erro);
       if (erro instanceof ErroDeChave || erro instanceof ErroDePlano) break;
       // Crédito no fim ou voz inválida: não adianta insistir mais 400 vezes.
-      if (falhas >= 5) {
+      if (falhasSeguidas >= 5) {
         console.error("Cinco falhas seguidas — parando. Confira a voz e os créditos.");
         break;
       }
