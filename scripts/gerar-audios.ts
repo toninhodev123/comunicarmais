@@ -371,7 +371,12 @@ async function escreverLista() {
   }
 
   const corpo = Object.entries(bancos)
-    .map(([nome, slugs]) => `  "${nome}": [\n${slugs.map((s) => `    "${s}",`).join("\n")}\n  ],`)
+    .map(([nome, slugs]) => {
+      // Chave sem aspas quando dá, para o arquivo gerado já sair no formato
+      // que o prettier exige (o lint roda em cima dele).
+      const chave = /^[a-zA-Z_$][\w$]*$/.test(nome) ? nome : `"${nome}"`;
+      return `  ${chave}: [\n${slugs.map((s) => `    "${s}",`).join("\n")}\n  ],`;
+    })
     .join("\n");
 
   await writeFile(
