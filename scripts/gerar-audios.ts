@@ -98,10 +98,15 @@ interface Provedor {
   nome: string;
   voz: string;
   gravar: (texto: string, destinoSemExtensao: string) => Promise<void>;
+  /** Fecha conexões abertas, para o processo não ficar pendurado no fim. */
+  encerrar?: () => void;
 }
 
 async function provedorEdge(): Promise<Provedor> {
   const voz = argumento("voz") ?? VOZ_EDGE_PADRAO;
+  // Um tiquinho mais devagar que o normal: fica mais fácil de acompanhar.
+  const ritmo = Number(argumento("ritmo") ?? 0.92);
+  if (!Number.isFinite(ritmo) || ritmo <= 0) throw new Error(`Ritmo inválido: ${ritmo}`);
   const tts = new MsEdgeTTS();
   await tts.setMetadata(voz, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
   return {
@@ -110,9 +115,19 @@ async function provedorEdge(): Promise<Provedor> {
     gravar: async (texto, destino) => {
       // O texto entra num SSML: escapamos o que quebraria o XML.
       const seguro = texto.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      // Um tiquinho mais devagar: fica mais fácil de acompanhar.
-      await tts.toFile(destino, seguro, { rate: Number(argumento("ritmo") ?? 0.92) });
+      // toFile() grava "audio.mp3" dentro de uma pasta; aqui queremos o nome
+      // exato do arquivo, então juntamos o stream e escrevemos nós mesmos.
+      const { audioStream } = tts.toStream(seguro, { rate: ritmo });
+      const pedacos: Buffer[] = [];
+      await new Promise<void>((resolve, reject) => {
+        audioStream.on("data", (parte: Buffer) => pedacos.push(Buffer.from(parte)));
+        audioStream.on("close", resolve);
+        audioStream.on("error", reject);
+      });
+      if (pedacos.length === 0) throw new Error("o servidor não devolveu áudio");
+      await writeFile(`${destino}.mp3`, Buffer.concat(pedacos));
     },
+    encerrar: () => tts.close(),
   };
 }
 
@@ -282,6 +297,7 @@ async function gerar(nomeProvedor: string) {
     }
   }
 
+  provedor.encerrar?.();
   await escreverLista();
   console.log(`Pronto: ${gravados} gravados, ${pulados} já existiam, ${falhas} falharam.`);
 
