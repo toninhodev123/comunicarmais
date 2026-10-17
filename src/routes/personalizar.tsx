@@ -6,15 +6,11 @@ import { mascots, themeColors, useApp, type ThemeColor } from "@/context/AppCont
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  aoCarregarVozes,
   bancoPreferido,
   bancosDisponiveis,
   definirBancoPreferido,
-  definirVozPreferida,
   falar,
   nomeDoBanco,
-  vozPreferida,
-  vozesPortugues,
 } from "@/lib/voz";
 
 const difficultyStyles: Record<string, string> = {
@@ -156,8 +152,6 @@ function CustomizePage() {
 const FRASE_TESTE = "Oi! Eu sou a voz que vai falar com você.";
 
 function SecaoVoz() {
-  const [vozes, setVozes] = useState<SpeechSynthesisVoice[]>([]);
-  const [escolhida, setEscolhida] = useState<string | null>(null);
   const bancos = bancosDisponiveis();
   const [banco, setBanco] = useState<string | null>(null);
 
@@ -169,94 +163,38 @@ function SecaoVoz() {
     falar(FRASE_TESTE);
   };
 
-  useEffect(() => {
-    const atualizar = () => {
-      const lista = vozesPortugues();
-      setVozes(lista);
-      setEscolhida(vozPreferida() ?? lista[0]?.name ?? null);
-    };
-    return aoCarregarVozes(atualizar);
-  }, []);
-
-  const escolher = (nome: string) => {
-    setEscolhida(nome);
-    definirVozPreferida(nome);
-    falar(FRASE_TESTE);
-  };
+  // Sem gravações o app fala com a voz do próprio aparelho, escolhida
+  // automaticamente — não há o que selecionar aqui.
+  if (bancos.length === 0) return null;
 
   return (
     <section className="mb-8">
       <h2 className="mb-3 text-xl font-bold">Voz do aplicativo</h2>
-
-      {bancos.length > 0 && (
-        <div className="mb-5">
-          <p className="mb-3 text-sm text-muted-foreground">
-            Vozes gravadas: soam igual em qualquer celular ou computador. Toque para ouvir e
-            escolher.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {bancos.map((b) => {
-              const ativo = b === banco;
-              return (
-                <button
-                  key={b}
-                  onClick={() => escolherBanco(b)}
-                  aria-pressed={ativo}
-                  className={
-                    "flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all " +
-                    (ativo
-                      ? "border-primary bg-primary/10 shadow-md"
-                      : "border-border bg-card hover:border-primary/50")
-                  }
-                >
-                  <Volume2 className="h-5 w-5 shrink-0" />
-                  <span className="min-w-0 flex-1 font-semibold">{nomeDoBanco(b)}</span>
-                  {ativo && <Check className="h-5 w-5 shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       <p className="mb-3 text-sm text-muted-foreground">
-        {bancos.length > 0 ? "Voz de reserva" : "Voz do navegador"}, usada no que ainda não tem
-        gravação — as marcadas como <strong>Natural</strong>, <strong>Neural</strong> ou{" "}
-        <strong>Google</strong> são as menos robóticas. Toque em uma para ouvir e já deixar
-        escolhida.
+        Toque para ouvir e escolher. A voz vale para todas as atividades.
       </p>
-      {vozes.length === 0 ? (
-        <p className="rounded-xl bg-warm/30 px-3 py-2 text-sm">
-          Nenhuma voz em português encontrada neste navegador. No Chrome ou no Edge costuma
-          aparecer; no celular, instale uma voz em português nas configurações de fala.
-        </p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {vozes.map((v) => {
-            const ativa = v.name === escolhida;
-            return (
-              <button
-                key={v.name}
-                onClick={() => escolher(v.name)}
-                aria-pressed={ativa}
-                className={
-                  "flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all " +
-                  (ativa
-                    ? "border-primary bg-primary/10 shadow-md"
-                    : "border-border bg-card hover:border-primary/50")
-                }
-              >
-                <Volume2 className="h-5 w-5 shrink-0" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-semibold">{v.name}</span>
-                  <span className="block text-xs text-muted-foreground">{v.lang}</span>
-                </span>
-                {ativa && <Check className="h-5 w-5 shrink-0" />}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {bancos.map((b) => {
+          const ativo = b === banco;
+          return (
+            <button
+              key={b}
+              onClick={() => escolherBanco(b)}
+              aria-pressed={ativo}
+              className={
+                "flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all " +
+                (ativo
+                  ? "border-primary bg-primary/10 shadow-md"
+                  : "border-border bg-card hover:border-primary/50")
+              }
+            >
+              <Volume2 className="h-5 w-5 shrink-0" />
+              <span className="min-w-0 flex-1 font-semibold">{nomeDoBanco(b)}</span>
+              {ativo && <Check className="h-5 w-5 shrink-0" />}
+            </button>
+          );
+        })}
+      </div>
     </section>
   );
 }

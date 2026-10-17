@@ -5,7 +5,7 @@
 // com a voz do próprio navegador.
 
 export const bancosDeAudio: Record<string, string[]> = {
-  "feminina": [
+  feminina: [
     "a-aranha-arranha-a-ra-a-ra-arranha-a-aranha",
     "a-faca-corta-a-corda-curta-da-cama",
     "a-pata-gorda-bate-a-pata-na-porta-do-prato-de-pipoca",
@@ -467,7 +467,7 @@ export const bancosDeAudio: Record<string, string[]> = {
     "ziper",
     "zoologico",
   ],
-  "masculina": [
+  masculina: [
     "a-aranha-arranha-a-ra-a-ra-arranha-a-aranha",
     "a-faca-corta-a-corda-curta-da-cama",
     "a-pata-gorda-bate-a-pata-na-porta-do-prato-de-pipoca",

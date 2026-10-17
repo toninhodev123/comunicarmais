@@ -71,6 +71,8 @@ function pararAudio() {
   audioAtual = null;
 }
 
+// Preferência antiga, de quando dava para escolher a voz do navegador na
+// tela: ainda é respeitada se estiver salva, mas não há mais como mudá-la.
 const VOZ_STORAGE_KEY = "comunicar-plus:voz";
 
 /** Pedaços de nome que marcam as vozes mais naturais de cada sistema. */
@@ -90,19 +92,7 @@ const VOZES_NATURAIS = [
 ];
 const VOZES_ROBOTICAS = ["espeak", "compact", "pico", "festival"];
 
-/** Avisa quando o navegador terminar de carregar a lista de vozes. */
-export function aoCarregarVozes(callback: () => void): () => void {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return () => {};
-  const sintese = window.speechSynthesis;
-  sintese.onvoiceschanged = callback;
-  // Alguns navegadores já têm a lista pronta e nunca disparam o evento.
-  if (sintese.getVoices().length > 0) callback();
-  return () => {
-    if (sintese.onvoiceschanged === callback) sintese.onvoiceschanged = null;
-  };
-}
-
-export function vozesPortugues(): SpeechSynthesisVoice[] {
+function vozesPortugues(): SpeechSynthesisVoice[] {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return [];
   try {
     return window.speechSynthesis
@@ -126,22 +116,12 @@ function pontuarVoz(v: SpeechSynthesisVoice) {
   return nota;
 }
 
-export function vozPreferida(): string | null {
+function vozPreferida(): string | null {
   if (typeof window === "undefined") return null;
   try {
     return window.localStorage.getItem(VOZ_STORAGE_KEY);
   } catch {
     return null;
-  }
-}
-
-export function definirVozPreferida(nome: string | null) {
-  if (typeof window === "undefined") return;
-  try {
-    if (nome) window.localStorage.setItem(VOZ_STORAGE_KEY, nome);
-    else window.localStorage.removeItem(VOZ_STORAGE_KEY);
-  } catch {
-    // ignora erros de storage (ex.: navegação privada)
   }
 }
 
