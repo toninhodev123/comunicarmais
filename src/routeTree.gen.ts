@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as DesafiosRouteImport } from './routes/desafios'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as FonemasRouteImport } from './routes/fonemas'
 import { Route as HabilidadesSociaisRouteImport } from './routes/habilidades-sociais'
 import { Route as MemoriaRouteImport } from './routes/memoria'
@@ -22,9 +24,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DesafiosRoute = DesafiosRouteImport.update({
   id: '/desafios',
   path: '/desafios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FonemasRoute = FonemasRouteImport.update({
@@ -55,7 +67,9 @@ const VocabularioRoute = VocabularioRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/desafios': typeof DesafiosRoute
+  '/entrar': typeof EntrarRoute
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
@@ -64,7 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/desafios': typeof DesafiosRoute
+  '/entrar': typeof EntrarRoute
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
@@ -74,7 +90,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/desafios': typeof DesafiosRoute
+  '/entrar': typeof EntrarRoute
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
@@ -85,7 +103,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/desafios'
+    | '/entrar'
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
@@ -94,7 +114,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app'
     | '/desafios'
+    | '/entrar'
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
@@ -103,7 +125,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/app'
     | '/desafios'
+    | '/entrar'
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
@@ -113,7 +137,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRoute
   DesafiosRoute: typeof DesafiosRoute
+  EntrarRoute: typeof EntrarRoute
   FonemasRoute: typeof FonemasRoute
   HabilidadesSociaisRoute: typeof HabilidadesSociaisRoute
   MemoriaRoute: typeof MemoriaRoute
@@ -130,11 +156,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/desafios': {
       id: '/desafios'
       path: '/desafios'
       fullPath: '/desafios'
       preLoaderRoute: typeof DesafiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fonemas': {
@@ -177,7 +217,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRoute,
   DesafiosRoute: DesafiosRoute,
+  EntrarRoute: EntrarRoute,
   FonemasRoute: FonemasRoute,
   HabilidadesSociaisRoute: HabilidadesSociaisRoute,
   MemoriaRoute: MemoriaRoute,
