@@ -154,69 +154,78 @@ export function Tito({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 200 200" className={className} role="img" aria-label="Tito, o tucano">
       <defs>
-        <linearGradient id="tito-corpo" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#3FBFB0" />
-          <stop offset="100%" stopColor="#1E8E86" />
+        <linearGradient id="tito-corpo" x1="0.2" y1="0" x2="0.9" y2="1">
+          <stop offset="0%" stopColor="#1E6F6B" />
+          <stop offset="100%" stopColor="#0E3F3E" />
         </linearGradient>
-        <linearGradient id="tito-bico" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#FFC24A" />
-          <stop offset="70%" stopColor="#FF8A3C" />
-          <stop offset="100%" stopColor="#F2654E" />
+        <linearGradient id="tito-bico-cima" x1="1" y1="0" x2="0" y2="0.4">
+          <stop offset="0%" stopColor="#FFD24A" />
+          <stop offset="55%" stopColor="#FF9B33" />
+          <stop offset="100%" stopColor="#EF5B46" />
+        </linearGradient>
+        <linearGradient id="tito-bico-baixo" x1="1" y1="0" x2="0" y2="0">
+          <stop offset="0%" stopColor="#F3A83A" />
+          <stop offset="100%" stopColor="#D9612F" />
         </linearGradient>
       </defs>
       <Chao />
 
-      {/* cauda */}
-      <path d="M140 142 q28 12 34 32 q-24 -2 -38 -16 z" fill="#17776F" opacity="0.9" />
+      {/* cauda em duas penas, atrás do corpo */}
+      <path d="M140 138 q30 16 34 40 q-22 0 -34 -18 z" fill="#0B3433" />
+      <path d="M134 150 q24 14 26 34 q-20 -2 -30 -18 z" fill="#15514F" />
 
       {/* corpo */}
-      <ellipse cx="104" cy="120" rx="48" ry="52" fill="url(#tito-corpo)" />
-      <ellipse cx="114" cy="134" rx="31" ry="36" fill="#FFF6E4" opacity="0.95" />
+      <ellipse cx="110" cy="116" rx="46" ry="52" fill="url(#tito-corpo)" />
+      {/* peito claro, com o recorte alto típico do tucano */}
+      <path d="M86 96 q34 -10 50 6 q10 36 -6 58 q-26 14 -46 -6 q-12 -32 2 -58 z" fill="#FFF4DC" />
 
-      {/* asa que bate devagar */}
+      {/* asa em camadas */}
       <motion.g
-        style={{ transformBox: "fill-box", transformOrigin: "20% 20%" }}
-        animate={menosMovimento ? undefined : { rotate: [0, -14, 0] }}
-        transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformBox: "fill-box", transformOrigin: "25% 15%" }}
+        animate={menosMovimento ? undefined : { rotate: [0, -12, 0] }}
+        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
       >
-        <path d="M128 104 q34 10 30 44 q-24 6 -38 -16 z" fill="#17776F" />
+        <path d="M126 102 q30 10 26 44 q-22 4 -32 -20 z" fill="#0B3433" />
         <path
-          d="M134 116 q20 8 20 26"
-          stroke="#3FBFB0"
+          d="M128 110 q22 10 20 32"
+          stroke="#2E8F89"
+          strokeWidth="3.5"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d="M130 122 q16 8 15 24"
+          stroke="#2E8F89"
           strokeWidth="3"
           fill="none"
           strokeLinecap="round"
         />
       </motion.g>
 
-      {/* bico grande */}
+      {/* bico: mandíbula de cima e de baixo, com a linha do cume */}
+      <path d="M74 94 q-38 -8 -62 14 q22 16 62 14 q8 -16 0 -28 z" fill="url(#tito-bico-cima)" />
       <path
-        d="M66 102 q-44 4 -52 20 q22 20 54 16 q10 -18 -2 -36 z"
-        fill="url(#tito-bico)"
-        stroke="#E0572F"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M22 118 q16 10 34 10"
-        stroke="#E0572F"
-        strokeWidth="2.5"
+        d="M12 108 q28 -16 62 -14"
+        stroke="#C94A2E"
+        strokeWidth="3"
         fill="none"
         strokeLinecap="round"
       />
+      <path d="M74 118 q-34 4 -58 -8 q16 20 58 20 q6 -6 0 -12 z" fill="url(#tito-bico-baixo)" />
+      <path d="M26 112 q22 8 48 8" stroke="#B8441F" strokeWidth="2" fill="none" opacity="0.5" />
 
-      {/* olho */}
-      <circle cx="86" cy="94" r="15" fill="#FFF6E4" />
+      {/* mancha clara em volta do olho */}
+      <ellipse cx="92" cy="86" rx="18" ry="15" fill="#9FE4D8" />
       <Piscada intervalo={3.8} atraso={0.4}>
-        <circle cx="86" cy="94" r="7.5" fill="#2E2A3B" />
+        <circle cx="90" cy="86" r="7.5" fill="#20242E" />
       </Piscada>
-      <circle cx="89" cy="90.5" r="2.6" fill="#fff" />
+      <circle cx="92.5" cy="83" r="2.6" fill="#fff" />
 
       {/* pés */}
       <path
-        d="M92 172 l0 14 M92 186 l-9 6 M92 186 l9 6 M118 172 l0 14 M118 186 l-9 6 M118 186 l9 6"
-        stroke="#FF9F3C"
-        strokeWidth="4.5"
+        d="M96 166 l0 16 M96 182 l-10 7 M96 182 l10 7 M122 164 l0 18 M122 182 l-10 7 M122 182 l10 7"
+        stroke="#F2A03C"
+        strokeWidth="5"
         strokeLinecap="round"
         fill="none"
       />

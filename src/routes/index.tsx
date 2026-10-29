@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import {
   ArrowDown,
   BookOpen,
@@ -14,13 +14,18 @@ import {
   Mic,
   MousePointerClick,
   Repeat,
+  Lock,
+  MessagesSquare,
   ShieldCheck,
   Smartphone,
   Sparkles,
   Star,
+  Target,
   Timer,
   Users,
   Volume2,
+  Waves,
+  X,
 } from "lucide-react";
 import { mascots } from "@/context/AppContext";
 import { falar } from "@/lib/voz";
@@ -250,19 +255,27 @@ function Landing() {
   useScrollSuave();
 
   return (
-    <div id="topo" className="min-h-dvh overflow-x-hidden bg-background">
+    /* overflow-x-clip e não -hidden: "hidden" vira contexto de rolagem e
+       quebraria o position:sticky da galeria que fixa na tela. */
+    <div id="topo" className="min-h-dvh overflow-x-clip bg-background">
+      <BarraDeLeitura />
       <Topo />
       <Heroi />
       <Vitrine />
+      <FaixaNumeros />
       <PorQueExiste />
       <ComoFunciona />
       <Mascotes />
+      <Metodologia />
       <Pontuacao />
       <Atividades />
+      <TelasDoApp />
+      <GaleriaCategorias />
       <NumerosDoConteudo />
       <Vozes />
       <Cuidado />
       <ParaAdultos />
+      <Privacidade />
       <Perguntas />
       <Fechamento />
       <Rodape />
@@ -1292,6 +1305,426 @@ function Fechamento() {
             </Button>
           </div>
         </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* --------------------------------------------------------- seções novas */
+
+/** Fiozinho no topo que mostra o quanto da página já foi lido. */
+function BarraDeLeitura() {
+  const { scrollYProgress } = useScroll();
+  const largura = useSpring(scrollYProgress, { stiffness: 140, damping: 26, mass: 0.3 });
+  return (
+    <motion.div
+      style={{ scaleX: largura, originX: 0 }}
+      className="fixed inset-x-0 top-0 z-[60] h-1 bg-primary"
+      aria-hidden="true"
+    />
+  );
+}
+
+/** Faixa escura: dá contraste no meio da página e segura os números grandes. */
+function FaixaNumeros() {
+  const numeros = [
+    { valor: 13, rotulo: "fonemas" },
+    { valor: 289, rotulo: "palavras" },
+    { valor: 920, rotulo: "áudios" },
+    { valor: 5, rotulo: "atividades" },
+  ];
+  return (
+    <section className="relative overflow-hidden bg-foreground py-14 text-background sm:py-16">
+      <div className="pointer-events-none absolute inset-0 opacity-[0.07]">
+        <Manchas intensidade={1} />
+      </div>
+      <div className="relative mx-auto grid w-full max-w-6xl grid-cols-2 gap-8 px-4 sm:grid-cols-4">
+        {numeros.map((n, i) => (
+          <Reveal key={n.rotulo} atraso={i * 0.08} className="text-center">
+            <p className="font-display text-5xl font-bold sm:text-6xl">
+              <Contador valor={n.valor} />
+            </p>
+            <p className="mt-2 text-sm uppercase tracking-wider opacity-70">{n.rotulo}</p>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** A progressão terapêutica que o app segue, do som solto até a conversa. */
+function Metodologia() {
+  const etapas = [
+    {
+      titulo: "O som sozinho",
+      desc: "Antes da palavra vem a boca: onde encosta a língua, se o som vibra, se sai ar. Cada fonema abre com essa instrução.",
+      onde: "Banco de Palavras",
+      icone: Waves,
+    },
+    {
+      titulo: "O som na palavra",
+      desc: "O mesmo fonema aparece no início, no meio e no fim — porque errar o R de “rato” é diferente de errar o de “porta”.",
+      onde: "Banco de Palavras · Vocabulário",
+      icone: Target,
+    },
+    {
+      titulo: "A palavra na frase",
+      desc: "Trava-línguas forçam a sequência rápida de sons parecidos, que é onde a troca reaparece quando a fala acelera.",
+      onde: "Trava-Línguas",
+      icone: Mic,
+    },
+    {
+      titulo: "A frase na conversa",
+      desc: "Por último, a fala com função social: pedir, agradecer, recusar, consolar — falar para alguém, não para o exercício.",
+      onde: "Habilidades Sociais",
+      icone: MessagesSquare,
+    },
+  ];
+
+  return (
+    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+      <Reveal className="mx-auto max-w-3xl text-center">
+        <span className="text-sm font-bold uppercase tracking-wider text-primary">
+          Como o conteúdo foi montado
+        </span>
+        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+          Do som solto até a conversa de verdade
+        </h2>
+        <p className="mt-4 text-lg text-muted-foreground">
+          As atividades não são cinco jogos soltos: elas cobrem, em ordem, a mesma escada que se
+          sobe no consultório.
+        </p>
+      </Reveal>
+
+      <div className="mt-14 grid gap-5 lg:grid-cols-4">
+        {etapas.map((e, i) => (
+          <Reveal key={e.titulo} atraso={i * 0.1}>
+            <div className="relative h-full rounded-3xl border border-border bg-card p-7 shadow-sm">
+              <span className="font-display text-5xl font-bold text-primary/15">0{i + 1}</span>
+              <span
+                className="absolute right-6 top-6 grid h-12 w-12 place-items-center rounded-2xl"
+                style={{ background: "var(--primary-soft)" }}
+                aria-hidden="true"
+              >
+                <e.icone className="h-6 w-6 text-primary" />
+              </span>
+              <h3 className="mt-3 font-display text-xl font-bold">{e.titulo}</h3>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">{e.desc}</p>
+              <p className="mt-5 rounded-xl bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground">
+                {e.onde}
+              </p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Três telas do app recriadas em celular, para ver antes de entrar. */
+function TelasDoApp() {
+  const menosMovimento = useReducedMotion();
+
+  const Celular = ({
+    children,
+    atraso = 0,
+    titulo,
+    legenda,
+  }: {
+    children: ReactNode;
+    atraso?: number;
+    titulo: string;
+    legenda: string;
+  }) => (
+    <Reveal atraso={atraso} className="flex flex-col items-center">
+      <motion.div
+        animate={menosMovimento ? undefined : { y: [0, -10, 0] }}
+        transition={{ duration: 6 + atraso * 4, repeat: Infinity, ease: "easeInOut" }}
+        className="w-[260px] rounded-[2.2rem] border-[10px] border-foreground/90 bg-background p-4 shadow-2xl"
+        style={{ willChange: "transform" }}
+      >
+        <div className="mx-auto mb-3 h-1.5 w-16 rounded-full bg-foreground/20" />
+        {children}
+      </motion.div>
+      <p className="mt-5 font-display text-lg font-bold">{titulo}</p>
+      <p className="mt-1 max-w-[260px] text-center text-sm text-muted-foreground">{legenda}</p>
+    </Reveal>
+  );
+
+  return (
+    <section className="border-y border-border bg-card/40 py-20 sm:py-28">
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <Reveal className="text-center">
+          <span className="text-sm font-bold uppercase tracking-wider text-primary">
+            Veja antes de entrar
+          </span>
+          <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">As telas de verdade</h2>
+        </Reveal>
+
+        <div className="mt-14 grid justify-items-center gap-12 lg:grid-cols-3">
+          <Celular
+            titulo="Banco de Palavras"
+            legenda="O fonema escolhido, a dica de boca e as palavras para falar."
+          >
+            <div className="rounded-2xl bg-card p-3 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Fonema
+              </p>
+              <div className="mt-2 flex gap-2">
+                {["B", "P", "D", "T"].map((f, i) => (
+                  <span
+                    key={f}
+                    className={
+                      "grid h-10 w-10 place-items-center rounded-xl border-2 font-display font-bold " +
+                      (i === 0
+                        ? "border-transparent bg-primary text-primary-foreground"
+                        : "border-border")
+                    }
+                  >
+                    {f}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-3 rounded-xl bg-warm/30 px-3 py-2 text-xs leading-snug">
+                👄 Junte os lábios e solte a voz: o B vibra na garganta.
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {[
+                  ["⚽", "BOLA"],
+                  ["🎂", "BOLO"],
+                  ["🍌", "BANANA"],
+                  ["👢", "BOTA"],
+                ].map(([e, w]) => (
+                  <div key={w} className="rounded-xl border border-border px-2 py-3 text-center">
+                    <span className="text-xl">{e}</span>
+                    <p className="mt-1 text-[11px] font-bold">{w}</p>
+                  </div>
+                ))}
+              </div>
+              <motion.div
+                animate={menosMovimento ? undefined : { scale: [1, 1.04, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity }}
+                className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground"
+              >
+                <Mic className="h-4 w-4" /> Falar e verificar
+              </motion.div>
+            </div>
+          </Celular>
+
+          <Celular
+            atraso={0.12}
+            titulo="Memória Auditiva"
+            legenda="A sequência é falada sem acender nada: só de ouvido."
+          >
+            <div className="rounded-2xl bg-card p-3 text-center shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Sequência de 4 palavras
+              </p>
+              <p className="mt-2 font-display text-base font-bold">Sua vez! Repita (2/4)</p>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {[
+                  ["🐟", "Peixe"],
+                  ["❤️", "Coração"],
+                  ["✏️", "Lápis"],
+                  ["🥤", "Suco"],
+                  ["🏠", "Casa"],
+                  ["🍌", "Banana"],
+                ].map(([e, w], i) => (
+                  <motion.div
+                    key={w}
+                    animate={menosMovimento ? undefined : { opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 2.6, repeat: Infinity, delay: i * 0.25 }}
+                    className="rounded-xl border-2 border-border px-1 py-3"
+                  >
+                    <span className="text-xl">{e}</span>
+                    <p className="mt-0.5 text-[10px] font-bold">{w}</p>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-bold">
+                <Volume2 className="h-4 w-4" /> Ouvir a sequência
+              </div>
+            </div>
+          </Celular>
+
+          <Celular
+            atraso={0.24}
+            titulo="Trava-Línguas"
+            legenda="Cronômetro por desafio e o melhor tempo guardado."
+          >
+            <div className="rounded-2xl bg-card p-3 shadow-sm">
+              <div className="flex items-start gap-2">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-warm/30 text-xl">
+                  🐭
+                </span>
+                <p className="font-display text-sm font-bold leading-snug">
+                  O rato roeu a roupa do rei de Roma.
+                </p>
+              </div>
+              <p className="mt-2 rounded-xl bg-muted px-3 py-2 text-[11px]">
+                💡 Capricha no R vibrante!
+              </p>
+              <div className="mt-3 flex items-center gap-2 rounded-xl bg-muted px-3 py-2.5">
+                <Timer className="h-4 w-4 text-primary" />
+                <span className="font-display text-lg font-bold tabular-nums">00:06,5</span>
+                <span className="ml-auto flex items-center gap-1 text-xs font-bold text-success">
+                  🏆 00:05,9
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-xl border border-border py-2.5 text-center text-xs font-bold">
+                  Ouvir
+                </div>
+                <div className="rounded-xl bg-primary py-2.5 text-center text-xs font-bold text-primary-foreground">
+                  Falar
+                </div>
+              </div>
+            </div>
+          </Celular>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** As oito categorias do vocabulário deslizando enquanto a seção fica fixa. */
+function GaleriaCategorias() {
+  const ref = useRef<HTMLDivElement>(null);
+  const menosMovimento = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const suave = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
+  const x = useTransform(suave, [0, 1], ["1%", "-72%"]);
+
+  const categorias = [
+    { nome: "Meios de Transporte", emoji: "🚗", itens: 6, exemplo: "volante, pedal, hélice" },
+    { nome: "Alimentos", emoji: "🍎", itens: 8, exemplo: "casca, gomo, gema" },
+    { nome: "Animais", emoji: "🦁", itens: 8, exemplo: "juba, casco, crista" },
+    { nome: "Casa", emoji: "🏠", itens: 5, exemplo: "telhado, chuveiro, almofada" },
+    { nome: "Corpo Humano", emoji: "🧒", itens: 5, exemplo: "cotovelo, calcanhar, sobrancelha" },
+    { nome: "Escola", emoji: "🎒", itens: 4, exemplo: "zíper, régua, bebedouro" },
+    { nome: "Natureza e Clima", emoji: "🌳", itens: 4, exemplo: "galho, onda, arco-íris" },
+    { nome: "Roupas", emoji: "👕", itens: 4, exemplo: "gola, cós, cadarço" },
+  ];
+
+  const Cartao = ({ c }: { c: (typeof categorias)[number] }) => (
+    <div className="w-[280px] shrink-0 rounded-[2rem] border border-border bg-card p-7 shadow-sm sm:w-[320px]">
+      <span className="text-5xl" aria-hidden="true">
+        {c.emoji}
+      </span>
+      <h3 className="mt-4 font-display text-2xl font-bold">{c.nome}</h3>
+      <p className="mt-2 text-sm text-muted-foreground">{c.itens} objetos para explorar</p>
+      <p className="mt-4 rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
+        {c.exemplo}
+      </p>
+    </div>
+  );
+
+  if (menosMovimento) {
+    return (
+      <section className="mx-auto w-full max-w-6xl px-4 py-20">
+        <h2 className="font-display text-3xl font-bold sm:text-5xl">Oito categorias, 44 objetos</h2>
+        <div className="mt-10 flex flex-wrap gap-5">
+          {categorias.map((c) => (
+            <Cartao key={c.nome} c={c} />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section ref={ref} className="relative h-[320vh]">
+      {/* pt-16 deixa o título livre do menu fixo enquanto a seção está presa. */}
+      <div className="sticky top-0 flex h-dvh flex-col justify-center overflow-hidden pt-16">
+        <div className="mx-auto w-full max-w-6xl px-4">
+          <span className="text-sm font-bold uppercase tracking-wider text-primary">
+            Vocabulário
+          </span>
+          <h2 className="mt-3 max-w-2xl font-display text-3xl font-bold sm:text-5xl">
+            Oito categorias, 44 objetos, 199 partes para nomear
+          </h2>
+          <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+            Role para ver tudo o que a criança pode destrinchar — e lembre que cada parte tem áudio
+            próprio.
+          </p>
+        </div>
+        <motion.div style={{ x }} className="mt-12 flex gap-6 pl-[max(1rem,calc(50vw-36rem))]">
+          {categorias.map((c) => (
+            <Cartao key={c.nome} c={c} />
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/** O que o app faz e o que ele não faz — dito na cara, sem promessa inflada. */
+function Privacidade() {
+  const faz = [
+    "Guarda as estrelinhas no próprio aparelho, mesmo sem conta.",
+    "Com conta, sincroniza o progresso para continuar em outro aparelho.",
+    "Toca áudios que já vêm no site — nenhuma voz é gerada por IA durante o uso.",
+    "Funciona sem instalar nada, direto do navegador.",
+  ];
+  const naoFaz = [
+    "Não exibe anúncio nem link para fora do app.",
+    "Não guarda gravação da voz da criança: a fala é conferida e descartada.",
+    "Não dá diagnóstico nem substitui acompanhamento profissional.",
+    "Não usa rede de rastreamento de terceiros.",
+  ];
+
+  return (
+    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+      <Reveal className="text-center">
+        <span className="text-sm font-bold uppercase tracking-wider text-primary">
+          Transparência
+        </span>
+        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+          O que o app faz — e o que ele não faz
+        </h2>
+      </Reveal>
+
+      <div className="mt-14 grid gap-6 md:grid-cols-2">
+        <Reveal>
+          <div className="h-full rounded-[2rem] border-2 border-success/30 bg-success/5 p-8">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-success/15">
+              <ShieldCheck className="h-6 w-6 text-success" />
+            </span>
+            <h3 className="mt-5 font-display text-2xl font-bold">Faz</h3>
+            <ul className="mt-5 space-y-3">
+              {faz.map((t) => (
+                <li key={t} className="flex gap-3 text-base text-muted-foreground">
+                  <Check className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+
+        <Reveal atraso={0.1}>
+          <div className="h-full rounded-[2rem] border-2 border-border bg-card p-8">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-muted">
+              <Lock className="h-6 w-6 text-muted-foreground" />
+            </span>
+            <h3 className="mt-5 font-display text-2xl font-bold">Não faz</h3>
+            <ul className="mt-5 space-y-3">
+              {naoFaz.map((t) => (
+                <li key={t} className="flex gap-3 text-base text-muted-foreground">
+                  <X className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </div>
+
+      <Reveal atraso={0.16}>
+        <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-muted-foreground">
+          O reconhecimento de fala usa o serviço do próprio navegador para transformar som em texto;
+          o app recebe só o texto e o descarta assim que confere a palavra.
+        </p>
       </Reveal>
     </section>
   );
