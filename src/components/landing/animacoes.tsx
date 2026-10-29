@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { motion, useInView, useReducedMotion, type Variants } from "motion/react";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type MotionValue,
+  type Variants,
+} from "motion/react";
 
 /**
  * Peças de animação da landing. Tudo aqui respeita "reduzir movimento" do
@@ -24,7 +33,9 @@ export function Reveal({
       className={className}
       initial={menosMovimento ? { opacity: 0 } : { opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
+      // Só encolhe na vertical: encolher as laterais deixa de fora elementos
+      // estreitos colados na borda, que nunca disparariam.
+      viewport={{ once: true, margin: "-80px 0px" }}
       transition={{ duration: 0.6, delay: atraso, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
@@ -43,10 +54,22 @@ export const itemCascata: Variants = {
   visivel: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
 };
 
-/** Conta de 0 até `valor` quando o número entra na tela. */
-export function Contador({ valor, sufixo = "" }: { valor: number; sufixo?: string }) {
+/**
+ * Conta de 0 até `valor` quando o número entra na tela. A margem do observador
+ * encolhe só na vertical — encolher as laterais deixava um span estreito
+ * colado na borda esquerda parado no zero para sempre.
+ */
+export function Contador({
+  valor,
+  sufixo = "",
+  duracao = 1100,
+}: {
+  valor: number;
+  sufixo?: string;
+  duracao?: number;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
-  const naTela = useInView(ref, { once: true, margin: "-60px" });
+  const naTela = useInView(ref, { once: true, margin: "-80px 0px" });
   const menosMovimento = useReducedMotion();
   const [mostrado, setMostrado] = useState(0);
 
@@ -56,7 +79,6 @@ export function Contador({ valor, sufixo = "" }: { valor: number; sufixo?: strin
       setMostrado(valor);
       return;
     }
-    const duracao = 1100;
     const inicio = performance.now();
     let frame = 0;
     const passo = (agora: number) => {
@@ -67,7 +89,7 @@ export function Contador({ valor, sufixo = "" }: { valor: number; sufixo?: strin
     };
     frame = requestAnimationFrame(passo);
     return () => cancelAnimationFrame(frame);
-  }, [naTela, valor, menosMovimento]);
+  }, [naTela, valor, menosMovimento, duracao]);
 
   return (
     <span ref={ref} className="tabular-nums">
@@ -78,7 +100,13 @@ export function Contador({ valor, sufixo = "" }: { valor: number; sufixo?: strin
 }
 
 /** Fundo com manchas coloridas que respiram devagar atrás do conteúdo. */
-export function Manchas({ className = "" }: { className?: string }) {
+export function Manchas({
+  className = "",
+  intensidade = 0.28,
+}: {
+  className?: string;
+  intensidade?: number;
+}) {
   const menosMovimento = useReducedMotion();
   const manchas = [
     { cor: "oklch(0.78 0.13 200)", tamanho: 420, x: "-10%", y: "-15%", atraso: 0 },
@@ -97,7 +125,8 @@ export function Manchas({ className = "" }: { className?: string }) {
             height: m.tamanho,
             left: m.x,
             top: m.y,
-            opacity: 0.28,
+            opacity: intensidade,
+            willChange: "transform",
           }}
           animate={
             menosMovimento ? undefined : { scale: [1, 1.12, 1], x: [0, 24, 0], y: [0, -18, 0] }
@@ -110,24 +139,38 @@ export function Manchas({ className = "" }: { className?: string }) {
   );
 }
 
-/** Faixa de palavras que desliza sem fim, pausando ao passar o mouse. */
-export function Esteira({ itens }: { itens: string[] }) {
+/** Faixa de itens que desliza sem fim, pausando ao passar o mouse. */
+export function Esteira({
+  itens,
+  duracao = 38,
+  inverso = false,
+}: {
+  itens: string[];
+  duracao?: number;
+  inverso?: boolean;
+}) {
   const menosMovimento = useReducedMotion();
   const fila = [...itens, ...itens];
   return (
     <div className="group relative overflow-hidden py-2" aria-hidden="true">
       <div
-        className={
-          "flex w-max gap-3 group-hover:[animation-play-state:paused] " +
-          (menosMovimento ? "" : "animate-[esteira_38s_linear_infinite]")
+        className="flex w-max gap-3 group-hover:[animation-play-state:paused]"
+        style={
+          menosMovimento
+            ? undefined
+            : {
+                animation: `esteira ${duracao}s linear infinite`,
+                animationDirection: inverso ? "reverse" : "normal",
+                willChange: "transform",
+              }
         }
       >
-        {fila.map((palavra, i) => (
+        {fila.map((item, i) => (
           <span
-            key={`${palavra}-${i}`}
+            key={`${item}-${i}`}
             className="rounded-full border border-border bg-card px-4 py-2 text-base font-semibold capitalize shadow-sm"
           >
-            {palavra}
+            {item}
           </span>
         ))}
       </div>
@@ -135,4 +178,39 @@ export function Esteira({ itens }: { itens: string[] }) {
       <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent" />
     </div>
   );
+}
+
+/**
+ * Parallax amortecido: o valor do scroll passa por uma mola antes de virar
+ * deslocamento. Sem isso o elemento "pula" a cada evento de rolagem — era o
+ * que deixava os mascotes do topo travadinhos.
+ */
+export function useParallaxSuave(progresso: MotionValue<number>, distancia: number) {
+  const menosMovimento = useReducedMotion();
+  const suave = useSpring(progresso, { stiffness: 90, damping: 22, mass: 0.5 });
+  return useTransform(suave, [0, 1], [0, menosMovimento ? 0 : distancia]);
+}
+
+/**
+ * Segue o ponteiro dentro de um container e devolve dois valores de -1 a 1, já
+ * amortecidos — a base do leve 3D dos cards do topo.
+ */
+export function usePonteiro() {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const molaX = useSpring(x, { stiffness: 120, damping: 20, mass: 0.4 });
+  const molaY = useSpring(y, { stiffness: 120, damping: 20, mass: 0.4 });
+
+  const aoMover = (evento: React.MouseEvent<HTMLElement>) => {
+    const area = evento.currentTarget.getBoundingClientRect();
+    x.set(((evento.clientX - area.left) / area.width) * 2 - 1);
+    y.set(((evento.clientY - area.top) / area.height) * 2 - 1);
+  };
+
+  const aoSair = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return { x: molaX, y: molaY, aoMover, aoSair };
 }
