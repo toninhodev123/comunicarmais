@@ -249,6 +249,19 @@ const ESTILO_DIFICULDADE: Record<string, string> = {
   Difícil: "bg-destructive/15 text-destructive",
 };
 
+/** true a partir de lg (1024px) — usado para ligar efeitos só no desktop. */
+function useTelaLarga() {
+  const [largo, setLargo] = useState(false);
+  useEffect(() => {
+    const consulta = window.matchMedia("(min-width: 1024px)");
+    const atualizar = () => setLargo(consulta.matches);
+    atualizar();
+    consulta.addEventListener("change", atualizar);
+    return () => consulta.removeEventListener("change", atualizar);
+  }, []);
+  return largo;
+}
+
 /* ------------------------------------------------------------------ página */
 
 function Landing() {
@@ -352,7 +365,7 @@ function Heroi() {
   const posicoes = ["left-[2%] top-[6%]", "right-[4%] top-[26%]", "left-[20%] bottom-[2%]"];
 
   return (
-    <section ref={ref} className="relative overflow-hidden px-4 pb-24 pt-28 sm:pb-32 sm:pt-36">
+    <section ref={ref} className="relative overflow-hidden px-4 pb-16 pt-24 sm:pb-32 sm:pt-36">
       <Manchas />
       <div className="relative mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
@@ -364,7 +377,7 @@ function Heroi() {
           </Reveal>
 
           <Reveal atraso={0.08}>
-            <h1 className="mt-6 font-display text-4xl font-bold leading-[1.06] sm:text-6xl">
+            <h1 className="mt-5 font-display text-[2rem] font-bold leading-[1.1] sm:text-6xl">
               Falar fica fácil
               <br />
               quando tem{" "}
@@ -377,7 +390,7 @@ function Heroi() {
           </Reveal>
 
           <Reveal atraso={0.16}>
-            <p className="mt-6 max-w-xl text-lg text-muted-foreground sm:text-xl">
+            <p className="mt-5 max-w-xl text-base text-muted-foreground sm:text-xl">
               Treino diário de fala com 13 fonemas, 289 palavras e 920 áudios gravados com voz
               humana. A criança escolhe o mascote guia, fala no microfone e junta estrelinhas — e
               consegue fazer tudo sozinha.
@@ -420,10 +433,24 @@ function Heroi() {
           </Reveal>
         </div>
 
-        {/* Os três mascotes em camadas: cada um sobe num ritmo e o conjunto
-            inclina de leve seguindo o ponteiro. */}
+        {/* No celular os três ficam lado a lado, sem sobreposição; a partir de
+            lg entram em camadas, com parallax e inclinação pelo ponteiro. */}
+        <div className="grid grid-cols-3 gap-2 lg:hidden">
+          {mascots.map((m, i) => (
+            <Reveal key={m.id} atraso={0.1 + i * 0.08}>
+              <div className="flex h-full flex-col items-center rounded-3xl bg-card p-3 text-center shadow-lg ring-1 ring-border">
+                <Mascote id={m.id} className="h-16 w-16" />
+                <p className="mt-1 font-display text-sm font-bold">{m.name.split(",")[0]}</p>
+                <p className="mt-0.5 flex items-center gap-1 text-xs font-semibold text-warm-foreground">
+                  <Star className="h-3 w-3 fill-warm text-warm" /> {m.dailyGoal}
+                </p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+
         <div
-          className="relative h-[380px] [perspective:1200px] sm:h-[480px]"
+          className="relative hidden h-[480px] [perspective:1200px] lg:block"
           onMouseMove={ponteiro.aoMover}
           onMouseLeave={ponteiro.aoSair}
         >
@@ -461,13 +488,11 @@ function Heroi() {
                       ease: "easeInOut",
                       delay: i * 0.6,
                     }}
-                    className="grid place-items-center rounded-[2rem] bg-card p-5 shadow-xl ring-1 ring-border sm:p-7"
+                    className="grid place-items-center rounded-[2rem] bg-card p-7 shadow-xl ring-1 ring-border"
                     style={{ willChange: "transform" }}
                   >
-                    <Mascote id={m.id} className="h-24 w-24 sm:h-28 sm:w-28" />
-                    <p className="mt-2 font-display text-base font-bold sm:text-lg">
-                      {m.name.split(",")[0]}
-                    </p>
+                    <Mascote id={m.id} className="h-28 w-28" />
+                    <p className="mt-2 font-display text-lg font-bold">{m.name.split(",")[0]}</p>
                     <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-warm-foreground">
                       <Star className="h-4 w-4 fill-warm text-warm" /> {m.dailyGoal} por atividade
                     </p>
@@ -514,17 +539,17 @@ function PorQueExiste() {
   ];
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+    <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
       <Reveal className="mx-auto max-w-3xl text-center">
         <span className="text-sm font-bold uppercase tracking-wider text-primary">
           Por que o Comunicar+ existe
         </span>
-        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
           O treino de fala que trava não é o da clínica — é o de terça à noite
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid gap-6 md:grid-cols-3">
+      <div className="mt-10 grid sm:mt-14 gap-6 md:grid-cols-3">
         {colunas.map((c, i) => (
           <Reveal key={c.titulo} atraso={i * 0.1}>
             <div className="h-full rounded-3xl border border-border bg-card p-7 shadow-sm">
@@ -571,13 +596,13 @@ function ComoFunciona() {
   ];
 
   return (
-    <section className="border-y border-border bg-card/40 py-20 sm:py-28">
+    <section className="border-y border-border bg-card/40 py-14 sm:py-28">
       <div className="mx-auto w-full max-w-6xl px-4">
         <Reveal className="text-center">
-          <h2 className="font-display text-3xl font-bold sm:text-5xl">
+          <h2 className="font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
             Três passos, nada de manual
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
             Da primeira abertura até a rotina diária, sem configurar nada complicado.
           </p>
         </Reveal>
@@ -620,14 +645,14 @@ function Mascotes() {
   const menosMovimento = useReducedMotion();
 
   return (
-    <section id="mascotes" className="relative overflow-hidden py-20 sm:py-28">
+    <section id="mascotes" className="scroll-mt-20 relative overflow-hidden py-14 sm:py-28">
       <Manchas className="opacity-60" />
       <div className="relative mx-auto w-full max-w-6xl px-4">
         <Reveal className="mx-auto max-w-3xl text-center">
           <span className="text-sm font-bold uppercase tracking-wider text-primary">
             Os guias da jornada
           </span>
-          <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+          <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
             Cada bichinho carrega uma dificuldade
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
@@ -637,7 +662,7 @@ function Mascotes() {
           </p>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid sm:mt-14 gap-6 md:grid-cols-3">
           {mascots.map((m, i) => (
             <Reveal key={m.id} atraso={i * 0.1}>
               <motion.article
@@ -696,14 +721,14 @@ function Pontuacao() {
   ];
 
   return (
-    <section id="estrelinhas" className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
-      <div className="grid items-center gap-12 lg:grid-cols-2">
+    <section id="estrelinhas" className="scroll-mt-20 mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
+      <div className="grid items-center gap-12 lg:grid-cols-2 [&>*]:min-w-0">
         <div>
           <Reveal>
             <span className="text-sm font-bold uppercase tracking-wider text-primary">
               Pontuação que faz voltar amanhã
             </span>
-            <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+            <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
               Estrelinha por acerto,
               <br />
               fogo por dia seguido
@@ -711,7 +736,7 @@ function Pontuacao() {
           </Reveal>
 
           <Reveal atraso={0.1}>
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
               Toda palavra falada certo vale uma estrelinha, e ela fica guardada mesmo fechando o
               app. A meta do dia é por atividade, não um número solto: completar todas acende o
               streak, que só continua se o dia anterior fechou.
@@ -826,23 +851,26 @@ function Atividades() {
   const atividade = ATIVIDADES.find((a) => a.id === ativa)!;
 
   return (
-    <section id="atividades" className="border-y border-border bg-card/40 py-20 sm:py-28">
+    <section
+      id="atividades"
+      className="scroll-mt-20 border-y border-border bg-card/40 py-14 sm:py-28"
+    >
       <div className="mx-auto w-full max-w-6xl px-4">
         <Reveal className="text-center">
           <span className="text-sm font-bold uppercase tracking-wider text-primary">
             O que tem dentro
           </span>
-          <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+          <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
             Cinco jeitos de treinar a mesma fala
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
             Toque numa atividade para ver o que ela tem por dentro. Todas falam, escutam e dão
             estrelinha.
           </p>
         </Reveal>
 
         <Reveal atraso={0.1}>
-          <div className="mt-10 flex flex-wrap justify-center gap-2">
+          <div className="-mx-4 mt-10 flex gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0">
             {ATIVIDADES.map((a) => {
               const selecionada = a.id === ativa;
               return (
@@ -851,7 +879,7 @@ function Atividades() {
                   onClick={() => setAtiva(a.id)}
                   aria-pressed={selecionada}
                   className={
-                    "relative rounded-2xl px-5 py-3 text-base font-semibold transition-colors " +
+                    "relative shrink-0 rounded-2xl px-5 py-3 text-base font-semibold transition-colors " +
                     (selecionada
                       ? "text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground")
@@ -1004,17 +1032,17 @@ function Atividades() {
 
 function NumerosDoConteudo() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+    <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
       <Reveal className="text-center">
         <span className="text-sm font-bold uppercase tracking-wider text-primary">
           Conteúdo, não promessa
         </span>
-        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
           O que já está pronto dentro do app
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-10 grid sm:mt-14 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {NUMEROS_CONTEUDO.map((n, i) => (
           <Reveal key={n.rotulo} atraso={i * 0.07}>
             <div className="h-full rounded-3xl border border-border bg-card p-7 shadow-sm">
@@ -1043,17 +1071,17 @@ function Vozes() {
   };
 
   return (
-    <section id="vozes" className="border-y border-border bg-card/40 py-20 sm:py-28">
+    <section id="vozes" className="scroll-mt-20 border-y border-border bg-card/40 py-14 sm:py-28">
       <div className="mx-auto w-full max-w-6xl px-4">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="grid items-center gap-12 lg:grid-cols-2 [&>*]:min-w-0">
           <Reveal>
             <span className="text-sm font-bold uppercase tracking-wider text-primary">
               Voz gravada, não sintetizada na hora
             </span>
-            <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+            <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
               920 áudios, duas vozes, sempre iguais
             </h2>
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
               Cada palavra e cada frase foi gravada antes com voz neural em português do Brasil —
               460 arquivos na voz feminina e 460 na masculina. O app só toca o arquivo, então a
               criança ouve exatamente a mesma voz no celular da escola e no computador de casa.
@@ -1083,7 +1111,10 @@ function Vozes() {
 
               <div className="mt-6 space-y-4">
                 {palavras.map((p) => (
-                  <div key={p} className="flex items-center justify-between gap-3">
+                  <div
+                    key={p}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <span className="font-display text-lg font-bold capitalize">{p}</span>
                     <div className="flex gap-2">
                       {(["feminina", "masculina"] as const).map((banco) => {
@@ -1093,7 +1124,7 @@ function Vozes() {
                             key={banco}
                             variant={ativo ? "default" : "outline"}
                             onClick={() => tocar(banco, p)}
-                            className="h-11 rounded-xl px-4 text-sm"
+                            className="h-11 flex-1 rounded-xl px-3 text-sm sm:flex-none sm:px-4"
                           >
                             <Volume2 className="mr-1.5 h-4 w-4" />
                             {banco === "feminina" ? "Feminina" : "Masculina"}
@@ -1114,17 +1145,17 @@ function Vozes() {
 
 function Cuidado() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+    <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
       <Reveal className="mx-auto max-w-3xl text-center">
         <span className="text-sm font-bold uppercase tracking-wider text-primary">
           Feito para a criança usar sozinha
         </span>
-        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
           Cada decisão de tela tem um porquê
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid gap-5 sm:grid-cols-2">
+      <div className="mt-10 grid sm:mt-14 gap-5 sm:grid-cols-2">
         {CUIDADOS.map((c, i) => (
           <Reveal key={c.titulo} atraso={i * 0.08}>
             <div className="flex h-full gap-5 rounded-3xl border border-border bg-card p-7 shadow-sm">
@@ -1182,15 +1213,15 @@ function ParaAdultos() {
   ];
 
   return (
-    <section className="border-y border-border bg-card/40 py-20 sm:py-28">
+    <section className="border-y border-border bg-card/40 py-14 sm:py-28">
       <div className="mx-auto w-full max-w-6xl px-4">
         <Reveal className="text-center">
-          <h2 className="font-display text-3xl font-bold sm:text-5xl">
+          <h2 className="font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
             Quem está do outro lado também importa
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid sm:mt-14 gap-6 md:grid-cols-3">
           {publicos.map((p, i) => (
             <Reveal key={p.titulo} atraso={i * 0.1}>
               <div className="h-full rounded-3xl border border-border bg-card p-7 shadow-sm">
@@ -1224,9 +1255,11 @@ function Perguntas() {
   const [aberta, setAberta] = useState<number | null>(0);
 
   return (
-    <section id="perguntas" className="mx-auto w-full max-w-3xl px-4 py-20 sm:py-28">
+    <section id="perguntas" className="scroll-mt-20 mx-auto w-full max-w-3xl px-4 py-14 sm:py-28">
       <Reveal className="text-center">
-        <h2 className="font-display text-3xl font-bold sm:text-5xl">Perguntas que sempre chegam</h2>
+        <h2 className="font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
+          Perguntas que sempre chegam
+        </h2>
       </Reveal>
 
       <div className="mt-12 space-y-3">
@@ -1291,7 +1324,7 @@ function Fechamento() {
                 </motion.div>
               ))}
             </div>
-            <h2 className="mt-8 font-display text-3xl font-bold sm:text-5xl">
+            <h2 className="mt-8 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
               Treino de fala que a criança pede para fazer
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-foreground/80">
@@ -1382,12 +1415,12 @@ function Metodologia() {
   ];
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+    <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
       <Reveal className="mx-auto max-w-3xl text-center">
         <span className="text-sm font-bold uppercase tracking-wider text-primary">
           Como o conteúdo foi montado
         </span>
-        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
           Do som solto até a conversa de verdade
         </h2>
         <p className="mt-4 text-lg text-muted-foreground">
@@ -1396,7 +1429,7 @@ function Metodologia() {
         </p>
       </Reveal>
 
-      <div className="mt-14 grid gap-5 lg:grid-cols-4">
+      <div className="mt-10 grid sm:mt-14 gap-5 lg:grid-cols-4">
         {etapas.map((e, i) => (
           <Reveal key={e.titulo} atraso={i * 0.1}>
             <div className="relative h-full rounded-3xl border border-border bg-card p-7 shadow-sm">
@@ -1452,16 +1485,18 @@ function TelasDoApp() {
   );
 
   return (
-    <section className="border-y border-border bg-card/40 py-20 sm:py-28">
+    <section className="border-y border-border bg-card/40 py-14 sm:py-28">
       <div className="mx-auto w-full max-w-6xl px-4">
         <Reveal className="text-center">
           <span className="text-sm font-bold uppercase tracking-wider text-primary">
             Veja antes de entrar
           </span>
-          <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">As telas de verdade</h2>
+          <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
+            As telas de verdade
+          </h2>
         </Reveal>
 
-        <div className="mt-14 grid justify-items-center gap-12 lg:grid-cols-3">
+        <div className="mt-10 grid sm:mt-14 justify-items-center gap-12 lg:grid-cols-3">
           <Celular
             titulo="Banco de Palavras"
             legenda="O fonema escolhido, a dica de boca e as palavras para falar."
@@ -1591,6 +1626,7 @@ function TelasDoApp() {
 function GaleriaCategorias() {
   const ref = useRef<HTMLDivElement>(null);
   const menosMovimento = useReducedMotion();
+  const telaLarga = useTelaLarga();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const suave = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
   const x = useTransform(suave, [0, 1], ["1%", "-72%"]);
@@ -1619,13 +1655,28 @@ function GaleriaCategorias() {
     </div>
   );
 
-  if (menosMovimento) {
+  // No celular (e para quem pede menos movimento) a galeria vira um carrossel
+  // de arrastar: prender a tela e mover por scroll atrapalha no toque.
+  if (menosMovimento || !telaLarga) {
     return (
-      <section className="mx-auto w-full max-w-6xl px-4 py-20">
-        <h2 className="font-display text-3xl font-bold sm:text-5xl">Oito categorias, 44 objetos</h2>
-        <div className="mt-10 flex flex-wrap gap-5">
+      <section className="py-14 sm:py-20">
+        <div className="mx-auto w-full max-w-6xl px-4">
+          <span className="text-sm font-bold uppercase tracking-wider text-primary">
+            Vocabulário
+          </span>
+          <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
+            Oito categorias, 44 objetos, 199 partes para nomear
+          </h2>
+          <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+            Arraste para o lado para ver tudo o que a criança pode destrinchar — cada parte tem
+            áudio próprio.
+          </p>
+        </div>
+        <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4">
           {categorias.map((c) => (
-            <Cartao key={c.nome} c={c} />
+            <div key={c.nome} className="snap-center">
+              <Cartao c={c} />
+            </div>
           ))}
         </div>
       </section>
@@ -1640,7 +1691,7 @@ function GaleriaCategorias() {
           <span className="text-sm font-bold uppercase tracking-wider text-primary">
             Vocabulário
           </span>
-          <h2 className="mt-3 max-w-2xl font-display text-3xl font-bold sm:text-5xl">
+          <h2 className="mt-3 max-w-2xl font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
             Oito categorias, 44 objetos, 199 partes para nomear
           </h2>
           <p className="mt-4 max-w-xl text-lg text-muted-foreground">
@@ -1674,17 +1725,17 @@ function Privacidade() {
   ];
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:py-28">
+    <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
       <Reveal className="text-center">
         <span className="text-sm font-bold uppercase tracking-wider text-primary">
           Transparência
         </span>
-        <h2 className="mt-3 font-display text-3xl font-bold sm:text-5xl">
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
           O que o app faz — e o que ele não faz
         </h2>
       </Reveal>
 
-      <div className="mt-14 grid gap-6 md:grid-cols-2">
+      <div className="mt-10 grid sm:mt-14 gap-6 md:grid-cols-2">
         <Reveal>
           <div className="h-full rounded-[2rem] border-2 border-success/30 bg-success/5 p-8">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-success/15">
