@@ -179,26 +179,20 @@ export function Tito({ className }: { className?: string }) {
       {/* peito claro, com o recorte alto típico do tucano */}
       <path d="M86 96 q34 -10 50 6 q10 36 -6 58 q-26 14 -46 -6 q-12 -32 2 -58 z" fill="#FFF4DC" />
 
-      {/* asa em camadas */}
+      {/* asa dobrada, encostada no corpo */}
       <motion.g
-        style={{ transformBox: "fill-box", transformOrigin: "25% 15%" }}
-        animate={menosMovimento ? undefined : { rotate: [0, -12, 0] }}
-        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformBox: "fill-box", transformOrigin: "50% 8%" }}
+        animate={menosMovimento ? undefined : { rotate: [0, -7, 0] }}
+        transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
       >
-        <path d="M126 102 q30 10 26 44 q-22 4 -32 -20 z" fill="#0B3433" />
+        <ellipse cx="140" cy="126" rx="15" ry="29" fill="#2A8580" transform="rotate(16 140 126)" />
         <path
-          d="M128 110 q22 10 20 32"
-          stroke="#2E8F89"
-          strokeWidth="3.5"
+          d="M136 108 q10 16 6 38 M143 110 q9 16 5 36"
+          stroke="#0E3F3E"
+          strokeWidth="2.5"
           fill="none"
           strokeLinecap="round"
-        />
-        <path
-          d="M130 122 q16 8 15 24"
-          stroke="#2E8F89"
-          strokeWidth="3"
-          fill="none"
-          strokeLinecap="round"
+          opacity="0.55"
         />
       </motion.g>
 
