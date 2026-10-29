@@ -33,6 +33,7 @@ import {
   useParallaxSuave,
   usePonteiro,
 } from "@/components/landing/animacoes";
+import { Mascote } from "@/components/landing/mascotes";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -450,9 +451,7 @@ function Heroi() {
                     className="grid place-items-center rounded-[2rem] bg-card p-5 shadow-xl ring-1 ring-border sm:p-7"
                     style={{ willChange: "transform" }}
                   >
-                    <span className="text-6xl sm:text-7xl" aria-hidden="true">
-                      {m.emoji}
-                    </span>
+                    <Mascote id={m.id} className="h-24 w-24 sm:h-28 sm:w-28" />
                     <p className="mt-2 font-display text-base font-bold sm:text-lg">
                       {m.name.split(",")[0]}
                     </p>
@@ -539,6 +538,7 @@ function ComoFunciona() {
       numero: "1",
       titulo: "Escolhe o bichinho",
       desc: "Nina, Tito ou Léo. A escolha define a meta de estrelinhas do dia — do mais tranquilo ao mais corajoso.",
+      mascote: "nina" as const,
       emoji: "🐰",
     },
     {
@@ -546,12 +546,14 @@ function ComoFunciona() {
       titulo: "Ouve e fala",
       desc: "O app fala a palavra, a criança repete no microfone. Acertou, comemora; quase, mostra o que ouviu.",
       emoji: "🎤",
+      mascote: null,
     },
     {
       numero: "3",
       titulo: "Ganha estrelinha",
       desc: "Cada acerto vale uma estrela. Bateu a meta nas atividades, o dia fecha e o streak cresce.",
       emoji: "⭐",
+      mascote: null,
     },
   ];
 
@@ -581,11 +583,11 @@ function ComoFunciona() {
             <Reveal key={p.numero} atraso={i * 0.12}>
               <div className="relative h-full rounded-3xl border border-border bg-card p-7 shadow-sm">
                 <div
-                  className="grid h-14 w-14 place-items-center rounded-2xl text-3xl"
+                  className="grid h-14 w-14 place-items-center overflow-hidden rounded-2xl text-3xl"
                   style={{ background: "var(--primary-soft)" }}
                   aria-hidden="true"
                 >
-                  {p.emoji}
+                  {p.mascote ? <Mascote id={p.mascote} className="h-12 w-12" /> : p.emoji}
                 </div>
                 <p className="mt-5 font-display text-sm font-bold uppercase tracking-wider text-primary">
                   Passo {p.numero}
@@ -630,9 +632,7 @@ function Mascotes() {
                 transition={{ type: "spring", stiffness: 260, damping: 18 }}
                 className="flex h-full flex-col items-center rounded-[2rem] border-2 border-border bg-card p-8 text-center shadow-sm transition-shadow hover:shadow-2xl"
               >
-                <motion.span
-                  className="text-7xl"
-                  aria-hidden="true"
+                <motion.div
                   animate={menosMovimento ? undefined : { y: [0, -10, 0] }}
                   transition={{
                     duration: 4 + i * 0.7,
@@ -641,8 +641,8 @@ function Mascotes() {
                     delay: i * 0.4,
                   }}
                 >
-                  {m.emoji}
-                </motion.span>
+                  <Mascote id={m.id} className="h-36 w-36" />
+                </motion.div>
                 <h3 className="mt-5 font-display text-2xl font-bold">{m.name}</h3>
                 <span
                   className={
@@ -728,8 +728,8 @@ function Pontuacao() {
           <div className="rounded-[2rem] border border-border bg-card p-6 shadow-xl sm:p-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-warm/30 text-2xl">
-                  🦜
+                <span className="grid h-12 w-12 place-items-center overflow-hidden rounded-2xl bg-warm/30">
+                  <Mascote id="tito" className="h-11 w-11" />
                 </span>
                 <div>
                   <p className="font-display text-lg font-bold leading-none">Tito, o Tucano</p>
@@ -1262,9 +1262,9 @@ function Fechamento() {
         >
           <Manchas className="opacity-70" />
           <div className="relative">
-            <div className="flex justify-center gap-3 text-5xl sm:text-6xl" aria-hidden="true">
+            <div className="flex items-end justify-center gap-2 sm:gap-6">
               {mascots.map((m, i) => (
-                <motion.span
+                <motion.div
                   key={m.id}
                   animate={{ y: [0, -12, 0] }}
                   transition={{
@@ -1274,8 +1274,8 @@ function Fechamento() {
                     delay: i * 0.3,
                   }}
                 >
-                  {m.emoji}
-                </motion.span>
+                  <Mascote id={m.id} className="h-24 w-24 sm:h-32 sm:w-32" />
+                </motion.div>
               ))}
             </div>
             <h2 className="mt-8 font-display text-3xl font-bold sm:text-5xl">
