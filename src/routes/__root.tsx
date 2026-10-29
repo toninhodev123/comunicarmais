@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -119,8 +120,22 @@ function RootComponent() {
   );
 }
 
+/** Páginas abertas a quem ainda não entrou: a landing e o próprio login. */
+const ROTAS_PUBLICAS = ["/", "/entrar"];
+
 function AppShell() {
   const { session, authCarregando } = useApp();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // A landing não espera o Supabase responder: ela é igual para todo mundo.
+  if (ROTAS_PUBLICAS.includes(pathname)) {
+    return (
+      <>
+        <Outlet />
+        <Toaster richColors position="top-center" />
+      </>
+    );
+  }
 
   if (authCarregando) {
     return (

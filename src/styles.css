@@ -137,3 +137,20 @@
   min-width: 3.5rem;
 }
 
+
+/* Faixa de palavras da landing: desliza metade da lista (que é duplicada),
+   então a emenda cai exatamente no ponto de repetição. */
+@keyframes esteira {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[esteira_38s_linear_infinite\] {
+    animation: none;
+  }
+}
