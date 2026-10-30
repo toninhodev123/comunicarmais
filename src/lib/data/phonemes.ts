@@ -521,9 +521,5 @@ export function silabasDe(fonema: Pick<Phoneme, "letter">) {
   const letra = fonema.letter.toUpperCase();
   const nome = NOME_DA_LETRA[letra] ?? letra.toLowerCase();
   const base = letra.toLowerCase();
-  const serie = VOGAIS_FALADAS.map((v) => `${nome}, ${v.nome}, ${base}${v.silaba}`).join(". ");
-  // O convite no fim não é enfeite: a voz relaxa na última frase que diz, e sem
-  // ele quem levava o relaxamento era o "zó, zu" do Z — o som perdia metade da
-  // vibração e escorregava para "só, su". Com o convite ali, a queda cai nele.
-  return `${serie}. Agora é a sua vez.`;
+  return VOGAIS_FALADAS.map((v) => `${nome}, ${v.nome}, ${base}${v.silaba}`).join(". ") + ".";
 }
