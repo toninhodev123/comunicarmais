@@ -39,6 +39,7 @@ import {
   usePonteiro,
 } from "@/components/landing/animacoes";
 import { Mascote } from "@/components/landing/mascotes";
+import { Brincadeira } from "@/components/landing/brincadeira";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -280,6 +281,7 @@ function Landing() {
       <PorQueExiste />
       <ComoFunciona />
       <Mascotes />
+      <Brincadeira />
       <Metodologia />
       <Pontuacao />
       <Atividades />
@@ -311,6 +313,7 @@ function Topo() {
 
   const links = [
     { href: "#mascotes", texto: "Mascotes" },
+    { href: "#brincar", texto: "Brincar" },
     { href: "#estrelinhas", texto: "Estrelinhas" },
     { href: "#atividades", texto: "Atividades" },
     { href: "#vozes", texto: "Vozes" },
@@ -346,16 +349,11 @@ function Topo() {
 function Heroi() {
   const ref = useRef<HTMLDivElement>(null);
   const menosMovimento = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  // Parallax passando por mola: é o que tira o "pulo" a cada evento de scroll.
-  const camadaFundo = useParallaxSuave(scrollYProgress, -60);
-  const camadaMeio = useParallaxSuave(scrollYProgress, -130);
-  const camadaFrente = useParallaxSuave(scrollYProgress, -200);
-  const camadas = [camadaFundo, camadaFrente, camadaMeio];
-
-  const ponteiro = usePonteiro();
-  const girarX = useTransform(ponteiro.y, [-1, 1], [8, -8]);
-  const girarY = useTransform(ponteiro.x, [-1, 1], [-10, 10]);
+  // As camadas com parallax só entram depois da hidratação: o useScroll mede
+  // o elemento alvo na montagem e reclama (com razão) de medir um nó que o
+  // servidor desenhou mas o React ainda não assumiu.
+  const [hidratado, setHidratado] = useState(false);
+  useEffect(() => setHidratado(true), []);
 
   const [ouvindo, setOuvindo] = useState<string | null>(null);
   const ouvirPalavra = () => {
@@ -452,61 +450,75 @@ function Heroi() {
           ))}
         </div>
 
-        <div
-          className="relative hidden h-[480px] [perspective:1200px] lg:block"
-          onMouseMove={ponteiro.aoMover}
-          onMouseLeave={ponteiro.aoSair}
-        >
-          <motion.div
-            className="absolute inset-0"
-            style={
-              menosMovimento
-                ? undefined
-                : { rotateX: girarX, rotateY: girarY, transformStyle: "preserve-3d" }
-            }
-          >
-            {mascots.map((m, i) => (
-              <motion.div
-                key={m.id}
-                style={{ y: camadas[i], willChange: "transform" }}
-                className={"absolute " + posicoes[i]}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.72, rotate: i === 1 ? 6 : -6 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 140,
-                    damping: 15,
-                    delay: 0.15 + i * 0.1,
-                  }}
-                >
-                  <motion.div
-                    animate={
-                      menosMovimento ? undefined : { y: [0, -14, 0], rotate: [-1.5, 1.5, -1.5] }
-                    }
-                    transition={{
-                      duration: 5 + i * 0.9,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: i * 0.6,
-                    }}
-                    className="grid place-items-center rounded-[2rem] bg-card p-7 shadow-xl ring-1 ring-border"
-                    style={{ willChange: "transform" }}
-                  >
-                    <Mascote id={m.id} className="h-28 w-28" />
-                    <p className="mt-2 font-display text-lg font-bold">{m.name.split(",")[0]}</p>
-                    <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-warm-foreground">
-                      <Star className="h-4 w-4 fill-warm text-warm" /> {m.dailyGoal} por atividade
-                    </p>
-                  </motion.div>
-                </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
+        <div className="relative hidden h-[480px] lg:block">
+          {hidratado && <CamadasDeMascotes alvo={ref} />}
         </div>
       </div>
     </section>
+  );
+}
+
+/** Os três mascotes em camadas: parallax amortecido e leve 3D pelo ponteiro. */
+function CamadasDeMascotes({ alvo }: { alvo: React.RefObject<HTMLDivElement | null> }) {
+  const menosMovimento = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: alvo, offset: ["start start", "end start"] });
+  const camadaFundo = useParallaxSuave(scrollYProgress, -60);
+  const camadaMeio = useParallaxSuave(scrollYProgress, -130);
+  const camadaFrente = useParallaxSuave(scrollYProgress, -200);
+  const camadas = [camadaFundo, camadaFrente, camadaMeio];
+
+  const ponteiro = usePonteiro();
+  const girarX = useTransform(ponteiro.y, [-1, 1], [8, -8]);
+  const girarY = useTransform(ponteiro.x, [-1, 1], [-10, 10]);
+  const posicoes = ["left-[2%] top-[6%]", "right-[4%] top-[26%]", "left-[20%] bottom-[2%]"];
+
+  return (
+    <div
+      className="absolute inset-0 [perspective:1200px]"
+      onMouseMove={ponteiro.aoMover}
+      onMouseLeave={ponteiro.aoSair}
+    >
+      <motion.div
+        className="absolute inset-0"
+        style={
+          menosMovimento
+            ? undefined
+            : { rotateX: girarX, rotateY: girarY, transformStyle: "preserve-3d" }
+        }
+      >
+        {mascots.map((m, i) => (
+          <motion.div
+            key={m.id}
+            style={{ y: camadas[i], willChange: "transform" }}
+            className={"absolute " + posicoes[i]}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.72, rotate: i === 1 ? 6 : -6 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 140, damping: 15, delay: 0.15 + i * 0.1 }}
+            >
+              <motion.div
+                animate={menosMovimento ? undefined : { y: [0, -14, 0], rotate: [-1.5, 1.5, -1.5] }}
+                transition={{
+                  duration: 5 + i * 0.9,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.6,
+                }}
+                className="grid place-items-center rounded-[2rem] bg-card p-7 shadow-xl ring-1 ring-border"
+                style={{ willChange: "transform" }}
+              >
+                <Mascote id={m.id} className="h-28 w-28" />
+                <p className="mt-2 font-display text-lg font-bold">{m.name.split(",")[0]}</p>
+                <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-warm-foreground">
+                  <Star className="h-4 w-4 fill-warm text-warm" /> {m.dailyGoal} por atividade
+                </p>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
   );
 }
 
@@ -1626,45 +1638,19 @@ function TelasDoApp() {
 }
 
 /** As oito categorias do vocabulário deslizando enquanto a seção fica fixa. */
-function GaleriaCategorias({ telaLarga }: { telaLarga: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const fila = useRef<HTMLDivElement>(null);
-  const menosMovimento = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const suave = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
+const CATEGORIAS = [
+  { nome: "Meios de Transporte", emoji: "🚗", itens: 6, exemplo: "volante, pedal, hélice" },
+  { nome: "Alimentos", emoji: "🍎", itens: 8, exemplo: "casca, gomo, gema" },
+  { nome: "Animais", emoji: "🦁", itens: 8, exemplo: "juba, casco, crista" },
+  { nome: "Casa", emoji: "🏠", itens: 5, exemplo: "telhado, chuveiro, almofada" },
+  { nome: "Corpo Humano", emoji: "🧒", itens: 5, exemplo: "cotovelo, calcanhar, sobrancelha" },
+  { nome: "Escola", emoji: "🎒", itens: 4, exemplo: "zíper, régua, bebedouro" },
+  { nome: "Natureza e Clima", emoji: "🌳", itens: 4, exemplo: "galho, onda, arco-íris" },
+  { nome: "Roupas", emoji: "👕", itens: 4, exemplo: "gola, cós, cadarço" },
+];
 
-  // Quanto a fila precisa andar é medido, não chutado em porcentagem: numa
-  // tela larga uma porcentagem fixa empurrava os cards para longe demais e
-  // sobrava um vazio no fim da seção.
-  const [percurso, setPercurso] = useState(0);
-  useEffect(() => {
-    const medir = () => {
-      const largura = fila.current?.scrollWidth ?? 0;
-      setPercurso(Math.max(0, largura - window.innerWidth + 48));
-      // A altura da seção muda junto com o percurso, e o useScroll só remede
-      // os limites no resize — sem este aviso ele fica com a medida antiga e
-      // o progresso trava em zero.
-      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-    };
-    medir();
-    window.addEventListener("resize", medir);
-    return () => window.removeEventListener("resize", medir);
-  }, [telaLarga]);
-
-  const x = useTransform(suave, [0, 1], [0, -percurso]);
-
-  const categorias = [
-    { nome: "Meios de Transporte", emoji: "🚗", itens: 6, exemplo: "volante, pedal, hélice" },
-    { nome: "Alimentos", emoji: "🍎", itens: 8, exemplo: "casca, gomo, gema" },
-    { nome: "Animais", emoji: "🦁", itens: 8, exemplo: "juba, casco, crista" },
-    { nome: "Casa", emoji: "🏠", itens: 5, exemplo: "telhado, chuveiro, almofada" },
-    { nome: "Corpo Humano", emoji: "🧒", itens: 5, exemplo: "cotovelo, calcanhar, sobrancelha" },
-    { nome: "Escola", emoji: "🎒", itens: 4, exemplo: "zíper, régua, bebedouro" },
-    { nome: "Natureza e Clima", emoji: "🌳", itens: 4, exemplo: "galho, onda, arco-íris" },
-    { nome: "Roupas", emoji: "👕", itens: 4, exemplo: "gola, cós, cadarço" },
-  ];
-
-  const Cartao = ({ c }: { c: (typeof categorias)[number] }) => (
+function CartaoCategoria({ c }: { c: (typeof CATEGORIAS)[number] }) {
+  return (
     <div className="w-[280px] shrink-0 rounded-[2rem] border border-border bg-card p-7 shadow-sm sm:w-[320px]">
       <span className="text-5xl" aria-hidden="true">
         {c.emoji}
@@ -1676,34 +1662,64 @@ function GaleriaCategorias({ telaLarga }: { telaLarga: boolean }) {
       </p>
     </div>
   );
+}
 
-  // No celular (e para quem pede menos movimento) a galeria vira um carrossel
-  // de arrastar: prender a tela e mover por scroll atrapalha no toque.
-  if (menosMovimento || !telaLarga) {
-    return (
-      <section className="py-14 sm:py-20">
-        <div className="mx-auto w-full max-w-6xl px-4">
-          <span className="text-sm font-bold uppercase tracking-wider text-primary">
-            Vocabulário
-          </span>
-          <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
-            Oito categorias, 44 objetos, 199 partes para nomear
-          </h2>
-          <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Arraste para o lado para ver tudo o que a criança pode destrinchar — cada parte tem
-            áudio próprio.
-          </p>
-        </div>
-        <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4">
-          {categorias.map((c) => (
-            <div key={c.nome} className="snap-center">
-              <Cartao c={c} />
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
+/**
+ * Duas versões da mesma galeria. A fixa tem os ganchos de scroll; o carrossel
+ * não tem nenhum — assim o useScroll nunca fica pendurado num elemento que o
+ * layout escolhido não desenhou.
+ */
+function GaleriaCategorias({ telaLarga }: { telaLarga: boolean }) {
+  const menosMovimento = useReducedMotion();
+  return menosMovimento || !telaLarga ? <GaleriaCarrossel /> : <GaleriaFixa />;
+}
+
+function GaleriaCarrossel() {
+  return (
+    <section className="py-14 sm:py-20">
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <span className="text-sm font-bold uppercase tracking-wider text-primary">Vocabulário</span>
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
+          Oito categorias, 44 objetos, 199 partes para nomear
+        </h2>
+        <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
+          Arraste para o lado para ver tudo o que a criança pode destrinchar — cada parte tem áudio
+          próprio.
+        </p>
+      </div>
+      <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4">
+        {CATEGORIAS.map((c) => (
+          <div key={c.nome} className="snap-center">
+            <CartaoCategoria c={c} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GaleriaFixa() {
+  const ref = useRef<HTMLDivElement>(null);
+  const fila = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const suave = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
+
+  // Quanto a fila precisa andar é medido, não chutado em porcentagem: numa
+  // tela larga uma porcentagem fixa empurrava os cards para longe demais.
+  const [percurso, setPercurso] = useState(0);
+  useEffect(() => {
+    const medir = () => {
+      const largura = fila.current?.scrollWidth ?? 0;
+      setPercurso(Math.max(0, largura - window.innerWidth + 48));
+      // A altura da seção muda junto, e o useScroll só remede no resize.
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    };
+    medir();
+    window.addEventListener("resize", medir);
+    return () => window.removeEventListener("resize", medir);
+  }, []);
+
+  const x = useTransform(suave, [0, 1], [0, -percurso]);
 
   return (
     <section ref={ref} className="relative" style={{ height: `calc(100vh + ${percurso}px)` }}>
@@ -1716,7 +1732,7 @@ function GaleriaCategorias({ telaLarga }: { telaLarga: boolean }) {
           <h2 className="mt-3 max-w-2xl font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
             Oito categorias, 44 objetos, 199 partes para nomear
           </h2>
-          <p className="mt-4 max-w-xl text-lg text-muted-foreground">
+          <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
             Role para ver tudo o que a criança pode destrinchar — e lembre que cada parte tem áudio
             próprio.
           </p>
@@ -1726,8 +1742,8 @@ function GaleriaCategorias({ telaLarga }: { telaLarga: boolean }) {
           style={{ x, willChange: "transform" }}
           className="mt-12 flex gap-6 pl-[max(1rem,calc(50vw-36rem))]"
         >
-          {categorias.map((c) => (
-            <Cartao key={c.nome} c={c} />
+          {CATEGORIAS.map((c) => (
+            <CartaoCategoria key={c.nome} c={c} />
           ))}
         </motion.div>
       </div>

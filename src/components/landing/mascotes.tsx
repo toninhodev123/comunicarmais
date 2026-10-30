@@ -9,6 +9,40 @@ import type { ReactNode } from "react";
  * fica parado quando o sistema pede menos movimento.
  */
 
+/** Para onde o mascote está olhando: -1 a 1 em cada eixo. */
+export interface Olhar {
+  x: number;
+  y: number;
+}
+
+export interface PropsMascote {
+  className?: string;
+  /** Quando passado, as pupilas acompanham o ponteiro (ou o toque). */
+  olhar?: Olhar;
+}
+
+/** Move as pupilas alguns pixels na direção do olhar, com mola. */
+function Pupilas({
+  children,
+  olhar,
+  alcance = 3,
+}: {
+  children: ReactNode;
+  olhar?: Olhar;
+  alcance?: number;
+}) {
+  const menosMovimento = useReducedMotion();
+  if (!olhar || menosMovimento) return <g>{children}</g>;
+  return (
+    <motion.g
+      animate={{ x: olhar.x * alcance, y: olhar.y * alcance }}
+      transition={{ type: "spring", stiffness: 260, damping: 22, mass: 0.4 }}
+    >
+      {children}
+    </motion.g>
+  );
+}
+
 /** Olhos que fecham de vez em quando, com ritmo próprio por mascote. */
 function Piscada({
   children,
@@ -43,7 +77,7 @@ function Chao() {
   return <ellipse cx="100" cy="196" rx="52" ry="9" fill="#2A2A3C" opacity="0.08" />;
 }
 
-export function Nina({ className }: { className?: string }) {
+export function Nina({ className, olhar }: PropsMascote) {
   // Ids únicos por instância: o mesmo mascote aparece várias vezes na
   // página, e ids repetidos fazem o navegador ignorar o gradiente.
   const unico = useId();
@@ -124,11 +158,13 @@ export function Nina({ className }: { className?: string }) {
       <circle cx="130" cy="132" r="9" fill="#F7A8BC" opacity="0.5" />
 
       <Piscada intervalo={4.6}>
-        <ellipse cx="84" cy="112" rx="6.5" ry="8.5" fill="#2E2A3B" />
-        <ellipse cx="116" cy="112" rx="6.5" ry="8.5" fill="#2E2A3B" />
+        <Pupilas olhar={olhar}>
+          <ellipse cx="84" cy="112" rx="6.5" ry="8.5" fill="#2E2A3B" />
+          <ellipse cx="116" cy="112" rx="6.5" ry="8.5" fill="#2E2A3B" />
+          <circle cx="86.5" cy="108.5" r="2.4" fill="#fff" />
+          <circle cx="118.5" cy="108.5" r="2.4" fill="#fff" />
+        </Pupilas>
       </Piscada>
-      <circle cx="86.5" cy="108.5" r="2.4" fill="#fff" />
-      <circle cx="118.5" cy="108.5" r="2.4" fill="#fff" />
 
       {/* focinho */}
       <ellipse cx="92" cy="134" rx="10" ry="8" fill="#FFFDFB" opacity="0.9" />
@@ -152,7 +188,7 @@ export function Nina({ className }: { className?: string }) {
   );
 }
 
-export function Tito({ className }: { className?: string }) {
+export function Tito({ className, olhar }: PropsMascote) {
   // Ids únicos por instância: o mesmo mascote aparece várias vezes na
   // página, e ids repetidos fazem o navegador ignorar o gradiente.
   const unico = useId();
@@ -224,9 +260,11 @@ export function Tito({ className }: { className?: string }) {
       {/* mancha clara em volta do olho */}
       <ellipse cx="92" cy="86" rx="18" ry="15" fill="#9FE4D8" />
       <Piscada intervalo={3.8} atraso={0.4}>
-        <circle cx="90" cy="86" r="7.5" fill="#20242E" />
+        <Pupilas olhar={olhar} alcance={4}>
+          <circle cx="90" cy="86" r="7.5" fill="#20242E" />
+          <circle cx="92.5" cy="83" r="2.6" fill="#fff" />
+        </Pupilas>
       </Piscada>
-      <circle cx="92.5" cy="83" r="2.6" fill="#fff" />
 
       {/* pés */}
       <path
@@ -240,7 +278,7 @@ export function Tito({ className }: { className?: string }) {
   );
 }
 
-export function Leo({ className }: { className?: string }) {
+export function Leo({ className, olhar }: PropsMascote) {
   // Ids únicos por instância: o mesmo mascote aparece várias vezes na
   // página, e ids repetidos fazem o navegador ignorar o gradiente.
   const unico = useId();
@@ -297,11 +335,13 @@ export function Leo({ className }: { className?: string }) {
       <circle cx="126" cy="126" r="8" fill="#F7A8BC" opacity="0.45" />
 
       <Piscada intervalo={5.2} atraso={0.9}>
-        <ellipse cx="86" cy="106" rx="6" ry="8" fill="#2E2A3B" />
-        <ellipse cx="114" cy="106" rx="6" ry="8" fill="#2E2A3B" />
+        <Pupilas olhar={olhar}>
+          <ellipse cx="86" cy="106" rx="6" ry="8" fill="#2E2A3B" />
+          <ellipse cx="114" cy="106" rx="6" ry="8" fill="#2E2A3B" />
+          <circle cx="88" cy="102.5" r="2.3" fill="#fff" />
+          <circle cx="116" cy="102.5" r="2.3" fill="#fff" />
+        </Pupilas>
       </Piscada>
-      <circle cx="88" cy="102.5" r="2.3" fill="#fff" />
-      <circle cx="116" cy="102.5" r="2.3" fill="#fff" />
 
       {/* focinho */}
       <ellipse cx="92" cy="130" rx="12" ry="9.5" fill="#FFF6E8" />
@@ -324,14 +364,14 @@ export function Leo({ className }: { className?: string }) {
   );
 }
 
-const MASCOTES: Record<MascotId, (props: { className?: string }) => React.ReactElement> = {
+const MASCOTES: Record<MascotId, (props: PropsMascote) => React.ReactElement> = {
   nina: Nina,
   tito: Tito,
   leo: Leo,
 };
 
 /** Desenha o mascote certo a partir do id usado no app. */
-export function Mascote({ id, className }: { id: MascotId; className?: string }) {
+export function Mascote({ id, className, olhar }: PropsMascote & { id: MascotId }) {
   const Desenho = MASCOTES[id];
-  return <Desenho className={className} />;
+  return <Desenho className={className} olhar={olhar} />;
 }
