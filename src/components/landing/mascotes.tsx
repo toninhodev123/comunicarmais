@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { MascotId } from "@/context/AppContext";
 import type { ReactNode } from "react";
@@ -43,6 +44,9 @@ function Chao() {
 }
 
 export function Nina({ className }: { className?: string }) {
+  // Ids únicos por instância: o mesmo mascote aparece várias vezes na
+  // página, e ids repetidos fazem o navegador ignorar o gradiente.
+  const unico = useId();
   const menosMovimento = useReducedMotion();
   const orelha = menosMovimento ? undefined : { rotate: [0, -5, 0, 3, 0] };
   const transicaoOrelha = { duration: 5.5, repeat: Infinity, ease: "easeInOut" as const };
@@ -50,7 +54,7 @@ export function Nina({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 200 200" className={className} role="img" aria-label="Nina, a coelha">
       <defs>
-        <linearGradient id="nina-pelo" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`nina-pelo-${unico}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#FFFBF7" />
           <stop offset="100%" stopColor="#F3E3D7" />
         </linearGradient>
@@ -68,7 +72,7 @@ export function Nina({ className }: { className?: string }) {
           cy="52"
           rx="15"
           ry="42"
-          fill="url(#nina-pelo)"
+          fill={`url(#nina-pelo-${unico})`}
           stroke="#E3CDBE"
           strokeWidth="2.5"
           transform="rotate(-9 78 52)"
@@ -85,7 +89,7 @@ export function Nina({ className }: { className?: string }) {
           cy="52"
           rx="15"
           ry="42"
-          fill="url(#nina-pelo)"
+          fill={`url(#nina-pelo-${unico})`}
           stroke="#E3CDBE"
           strokeWidth="2.5"
           transform="rotate(9 122 52)"
@@ -99,7 +103,7 @@ export function Nina({ className }: { className?: string }) {
         cy="168"
         rx="40"
         ry="28"
-        fill="url(#nina-pelo)"
+        fill={`url(#nina-pelo-${unico})`}
         stroke="#E3CDBE"
         strokeWidth="2.5"
       />
@@ -112,7 +116,7 @@ export function Nina({ className }: { className?: string }) {
         cy="118"
         rx="52"
         ry="46"
-        fill="url(#nina-pelo)"
+        fill={`url(#nina-pelo-${unico})`}
         stroke="#E3CDBE"
         strokeWidth="2.5"
       />
@@ -149,21 +153,24 @@ export function Nina({ className }: { className?: string }) {
 }
 
 export function Tito({ className }: { className?: string }) {
+  // Ids únicos por instância: o mesmo mascote aparece várias vezes na
+  // página, e ids repetidos fazem o navegador ignorar o gradiente.
+  const unico = useId();
   const menosMovimento = useReducedMotion();
 
   return (
     <svg viewBox="0 0 200 200" className={className} role="img" aria-label="Tito, o tucano">
       <defs>
-        <linearGradient id="tito-corpo" x1="0.2" y1="0" x2="0.9" y2="1">
+        <linearGradient id={`tito-corpo-${unico}`} x1="0.2" y1="0" x2="0.9" y2="1">
           <stop offset="0%" stopColor="#1E6F6B" />
           <stop offset="100%" stopColor="#0E3F3E" />
         </linearGradient>
-        <linearGradient id="tito-bico-cima" x1="1" y1="0" x2="0" y2="0.4">
+        <linearGradient id={`tito-bico-cima-${unico}`} x1="1" y1="0" x2="0" y2="0.4">
           <stop offset="0%" stopColor="#FFD24A" />
           <stop offset="55%" stopColor="#FF9B33" />
           <stop offset="100%" stopColor="#EF5B46" />
         </linearGradient>
-        <linearGradient id="tito-bico-baixo" x1="1" y1="0" x2="0" y2="0">
+        <linearGradient id={`tito-bico-baixo-${unico}`} x1="1" y1="0" x2="0" y2="0">
           <stop offset="0%" stopColor="#F3A83A" />
           <stop offset="100%" stopColor="#D9612F" />
         </linearGradient>
@@ -175,7 +182,7 @@ export function Tito({ className }: { className?: string }) {
       <path d="M134 150 q24 14 26 34 q-20 -2 -30 -18 z" fill="#15514F" />
 
       {/* corpo */}
-      <ellipse cx="110" cy="116" rx="46" ry="52" fill="url(#tito-corpo)" />
+      <ellipse cx="110" cy="116" rx="46" ry="52" fill={`url(#tito-corpo-${unico})`} />
       {/* peito claro, com o recorte alto típico do tucano */}
       <path d="M86 96 q34 -10 50 6 q10 36 -6 58 q-26 14 -46 -6 q-12 -32 2 -58 z" fill="#FFF4DC" />
 
@@ -197,7 +204,10 @@ export function Tito({ className }: { className?: string }) {
       </motion.g>
 
       {/* bico: mandíbula de cima e de baixo, com a linha do cume */}
-      <path d="M74 94 q-38 -8 -62 14 q22 16 62 14 q8 -16 0 -28 z" fill="url(#tito-bico-cima)" />
+      <path
+        d="M74 94 q-38 -8 -62 14 q22 16 62 14 q8 -16 0 -28 z"
+        fill={`url(#tito-bico-cima-${unico})`}
+      />
       <path
         d="M12 108 q28 -16 62 -14"
         stroke="#C94A2E"
@@ -205,7 +215,10 @@ export function Tito({ className }: { className?: string }) {
         fill="none"
         strokeLinecap="round"
       />
-      <path d="M74 118 q-34 4 -58 -8 q16 20 58 20 q6 -6 0 -12 z" fill="url(#tito-bico-baixo)" />
+      <path
+        d="M74 118 q-34 4 -58 -8 q16 20 58 20 q6 -6 0 -12 z"
+        fill={`url(#tito-bico-baixo-${unico})`}
+      />
       <path d="M26 112 q22 8 48 8" stroke="#B8441F" strokeWidth="2" fill="none" opacity="0.5" />
 
       {/* mancha clara em volta do olho */}
@@ -228,6 +241,9 @@ export function Tito({ className }: { className?: string }) {
 }
 
 export function Leo({ className }: { className?: string }) {
+  // Ids únicos por instância: o mesmo mascote aparece várias vezes na
+  // página, e ids repetidos fazem o navegador ignorar o gradiente.
+  const unico = useId();
   const menosMovimento = useReducedMotion();
   // A juba é feita de círculos em volta da cara; respira junto, como um todo.
   const jubas = Array.from({ length: 13 }, (_, i) => {
@@ -238,11 +254,11 @@ export function Leo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 200 200" className={className} role="img" aria-label="Léo, o leão">
       <defs>
-        <linearGradient id="leo-juba" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`leo-juba-${unico}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#F7B64B" />
           <stop offset="100%" stopColor="#DE8B26" />
         </linearGradient>
-        <linearGradient id="leo-cara" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`leo-cara-${unico}`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#FFE7BE" />
           <stop offset="100%" stopColor="#FFD39A" />
         </linearGradient>
@@ -270,13 +286,13 @@ export function Leo({ className }: { className?: string }) {
         transition={{ duration: 4.6, repeat: Infinity, ease: "easeInOut" }}
       >
         {jubas.map((j, i) => (
-          <circle key={i} cx={j.x} cy={j.y} r={j.r} fill="url(#leo-juba)" />
+          <circle key={i} cx={j.x} cy={j.y} r={j.r} fill={`url(#leo-juba-${unico})`} />
         ))}
-        <circle cx="100" cy="112" r="52" fill="url(#leo-juba)" />
+        <circle cx="100" cy="112" r="52" fill={`url(#leo-juba-${unico})`} />
       </motion.g>
 
       {/* cara */}
-      <circle cx="100" cy="112" r="40" fill="url(#leo-cara)" />
+      <circle cx="100" cy="112" r="40" fill={`url(#leo-cara-${unico})`} />
       <circle cx="74" cy="126" r="8" fill="#F7A8BC" opacity="0.45" />
       <circle cx="126" cy="126" r="8" fill="#F7A8BC" opacity="0.45" />
 

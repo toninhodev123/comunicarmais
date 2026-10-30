@@ -266,6 +266,7 @@ function useTelaLarga() {
 
 function Landing() {
   useScrollSuave();
+  const telaLarga = useTelaLarga();
 
   return (
     /* overflow-x-clip e não -hidden: "hidden" vira contexto de rolagem e
@@ -283,7 +284,9 @@ function Landing() {
       <Pontuacao />
       <Atividades />
       <TelasDoApp />
-      <GaleriaCategorias />
+      {/* A chave remonta a galeria ao mudar de celular para desktop: o
+          useScroll prende no elemento na montagem e não refaz isso sozinho. */}
+      <GaleriaCategorias key={telaLarga ? "larga" : "estreita"} telaLarga={telaLarga} />
       <NumerosDoConteudo />
       <Vozes />
       <Cuidado />
@@ -1623,13 +1626,32 @@ function TelasDoApp() {
 }
 
 /** As oito categorias do vocabulário deslizando enquanto a seção fica fixa. */
-function GaleriaCategorias() {
+function GaleriaCategorias({ telaLarga }: { telaLarga: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  const fila = useRef<HTMLDivElement>(null);
   const menosMovimento = useReducedMotion();
-  const telaLarga = useTelaLarga();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
   const suave = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.4 });
-  const x = useTransform(suave, [0, 1], ["1%", "-72%"]);
+
+  // Quanto a fila precisa andar é medido, não chutado em porcentagem: numa
+  // tela larga uma porcentagem fixa empurrava os cards para longe demais e
+  // sobrava um vazio no fim da seção.
+  const [percurso, setPercurso] = useState(0);
+  useEffect(() => {
+    const medir = () => {
+      const largura = fila.current?.scrollWidth ?? 0;
+      setPercurso(Math.max(0, largura - window.innerWidth + 48));
+      // A altura da seção muda junto com o percurso, e o useScroll só remede
+      // os limites no resize — sem este aviso ele fica com a medida antiga e
+      // o progresso trava em zero.
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    };
+    medir();
+    window.addEventListener("resize", medir);
+    return () => window.removeEventListener("resize", medir);
+  }, [telaLarga]);
+
+  const x = useTransform(suave, [0, 1], [0, -percurso]);
 
   const categorias = [
     { nome: "Meios de Transporte", emoji: "🚗", itens: 6, exemplo: "volante, pedal, hélice" },
@@ -1684,7 +1706,7 @@ function GaleriaCategorias() {
   }
 
   return (
-    <section ref={ref} className="relative h-[320vh]">
+    <section ref={ref} className="relative" style={{ height: `calc(100vh + ${percurso}px)` }}>
       {/* pt-16 deixa o título livre do menu fixo enquanto a seção está presa. */}
       <div className="sticky top-0 flex h-dvh flex-col justify-center overflow-hidden pt-16">
         <div className="mx-auto w-full max-w-6xl px-4">
@@ -1699,7 +1721,11 @@ function GaleriaCategorias() {
             próprio.
           </p>
         </div>
-        <motion.div style={{ x }} className="mt-12 flex gap-6 pl-[max(1rem,calc(50vw-36rem))]">
+        <motion.div
+          ref={fila}
+          style={{ x, willChange: "transform" }}
+          className="mt-12 flex gap-6 pl-[max(1rem,calc(50vw-36rem))]"
+        >
           {categorias.map((c) => (
             <Cartao key={c.nome} c={c} />
           ))}
