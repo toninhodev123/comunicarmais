@@ -473,13 +473,47 @@ export const phonemes: Phoneme[] = [
 ];
 
 /**
- * A série de sílabas do botão "ouvir as sílabas": cada sílaba dita duas vezes,
- * com as cinco vogais — ba ba, be be, bi bi, bo bo, bu bu. É como o treino
- * costuma ser conduzido, e repetir dá à criança tempo de acompanhar.
+ * A série do botão "ouvir as sílabas".
+ *
+ * O treino é letra, vogal e só então a sílaba: "pê, á, pá". Dizer a sílaba
+ * solta, e ainda repetida, saía tudo emendado — "pa, pa" virava uma palavra só.
+ * Separando, a criança ouve de que partes o som é feito antes de juntá-las.
+ *
+ * Os nomes das letras vão escritos como se fala, e não como se escreve: deixar
+ * um "P" sozinho no texto faz a voz sintética ler qualquer coisa; "pê" ela lê
+ * certo em qualquer aparelho. As sílabas levam acento (pá, pé, pó) para a vogal
+ * sair aberta e marcada, como na sala de terapia.
  */
-export const VOGAIS = ["a", "e", "i", "o", "u"] as const;
+const NOME_DA_LETRA: Record<string, string> = {
+  B: "bê",
+  P: "pê",
+  D: "dê",
+  T: "tê",
+  Z: "zê",
+  S: "esse",
+  J: "jota",
+  CH: "cê agá",
+  R: "erre",
+  L: "ele",
+  LH: "ele agá",
+  F: "efe",
+  V: "vê",
+};
+
+/** Nome e forma acentuada de cada vogal. */
+const VOGAIS_FALADAS = [
+  { nome: "á", silaba: "á" },
+  { nome: "é", silaba: "é" },
+  { nome: "i", silaba: "i" },
+  { nome: "ó", silaba: "ó" },
+  { nome: "u", silaba: "u" },
+] as const;
+
+export const VOGAIS = VOGAIS_FALADAS.map((v) => v.nome);
 
 export function silabasDe(fonema: Pick<Phoneme, "letter">) {
-  const base = fonema.letter.toLowerCase();
-  return VOGAIS.map((v) => `${base}${v}, ${base}${v}`).join(", ");
+  const letra = fonema.letter.toUpperCase();
+  const nome = NOME_DA_LETRA[letra] ?? letra.toLowerCase();
+  const base = letra.toLowerCase();
+  return VOGAIS_FALADAS.map((v) => `${nome}, ${v.nome}, ${base}${v.silaba}`).join(". ") + ".";
 }
