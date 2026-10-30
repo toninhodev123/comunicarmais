@@ -52,8 +52,9 @@ export function ExploradorDeFonemas() {
             Escolha um som e treine como na terapia
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-            Este é o Banco de Palavras do app, aberto aqui mesmo: a instrução de boca, a dica e as
-            palavras com o som em cada posição da sílaba. Toque numa palavra para ouvir.
+            Este é um exemplo do Banco de Palavras, como funciona no aplicativo: a instrução de
+            boca, a dica e as palavras com o som em cada posição da sílaba. Toque numa palavra para
+            ouvir — no app a experiência é bem melhor.
           </p>
         </Reveal>
 
@@ -165,8 +166,9 @@ export function ExploradorDeFonemas() {
                   </AnimatePresence>
                 </div>
                 <p className="mt-3 text-xs text-muted-foreground">
-                  Mostrando {palavras.length} de {fonema.words.length} palavras deste fonema — no
-                  app estão todas, e o microfone confere cada uma.
+                  Amostra de {palavras.length} das {fonema.words.length} palavras deste fonema — no
+                  aplicativo estão todas, com o microfone conferindo cada uma e as estrelinhas
+                  contando.
                 </p>
               </div>
             </div>
