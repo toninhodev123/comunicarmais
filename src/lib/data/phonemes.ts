@@ -481,8 +481,14 @@ export const phonemes: Phoneme[] = [
  *
  * Os nomes das letras vão escritos como se fala, e não como se escreve: deixar
  * um "P" sozinho no texto faz a voz sintética ler qualquer coisa; "pê" ela lê
- * certo em qualquer aparelho. As sílabas levam acento (pá, pé, pó) para a vogal
- * sair aberta e marcada, como na sala de terapia.
+ * certo em qualquer aparelho.
+ *
+ * E vão com acento onde o nome tem E aberto — "ésse", "érre", "éle", "éfe".
+ * Sem ele a voz fecha a vogal e sai "êsse", que soa como o pronome "esse"; o
+ * nome da letra se perde justamente no som que a criança precisa ouvir.
+ *
+ * As sílabas também levam acento (pá, pé, pó), para a vogal sair aberta e
+ * marcada, como na sala de terapia.
  */
 const NOME_DA_LETRA: Record<string, string> = {
   B: "bê",
@@ -490,13 +496,13 @@ const NOME_DA_LETRA: Record<string, string> = {
   D: "dê",
   T: "tê",
   Z: "zê",
-  S: "esse",
+  S: "ésse",
   J: "jota",
   CH: "cê agá",
-  R: "erre",
-  L: "ele",
-  LH: "ele agá",
-  F: "efe",
+  R: "érre",
+  L: "éle",
+  LH: "éle agá",
+  F: "éfe",
   V: "vê",
 };
 

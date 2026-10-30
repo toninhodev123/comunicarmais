@@ -5,7 +5,7 @@
 // com a voz do próprio navegador.
 
 export const bancosDeAudio: Record<string, string[]> = {
-  masculina: [
+  feminina: [
     "a-aranha-arranha-a-ra-a-ra-arranha-a-aranha",
     "a-faca-corta-a-corda-curta-da-cama",
     "a-pata-gorda-bate-a-pata-na-porta-do-prato-de-pipoca",
@@ -174,19 +174,14 @@ export const bancosDeAudio: Record<string, string[]> = {
     "dinossauro",
     "doce",
     "domingo",
-    "efe-a-fa-efe-e-fe-efe-i-fi-efe-o-fo-efe-u-fu",
-    "ele-a-la-ele-e-le-ele-i-li-ele-o-lo-ele-u-lu",
-    "ele-aga-a-lha-ele-aga-e-lhe-ele-aga-i-lhi-ele-aga-o-lho-ele-aga-u-lhu",
     "elefante",
     "ensino",
-    "erre-a-ra-erre-e-re-erre-i-ri-erre-o-ro-erre-u-ru",
     "escama",
     "escapamento",
     "escola",
     "escorrega",
     "escova",
     "espelho",
-    "esse-a-sa-esse-e-se-esse-i-si-esse-o-so-esse-u-su",
     "estampa",
     "esteira",
     "estojo",
@@ -467,7 +462,7 @@ export const bancosDeAudio: Record<string, string[]> = {
     "ziper",
     "zoologico",
   ],
-  feminina: [
+  masculina: [
     "a-aranha-arranha-a-ra-a-ra-arranha-a-aranha",
     "a-faca-corta-a-corda-curta-da-cama",
     "a-pata-gorda-bate-a-pata-na-porta-do-prato-de-pipoca",
@@ -636,19 +631,14 @@ export const bancosDeAudio: Record<string, string[]> = {
     "dinossauro",
     "doce",
     "domingo",
-    "efe-a-fa-efe-e-fe-efe-i-fi-efe-o-fo-efe-u-fu",
-    "ele-a-la-ele-e-le-ele-i-li-ele-o-lo-ele-u-lu",
-    "ele-aga-a-lha-ele-aga-e-lhe-ele-aga-i-lhi-ele-aga-o-lho-ele-aga-u-lhu",
     "elefante",
     "ensino",
-    "erre-a-ra-erre-e-re-erre-i-ri-erre-o-ro-erre-u-ru",
     "escama",
     "escapamento",
     "escola",
     "escorrega",
     "escova",
     "espelho",
-    "esse-a-sa-esse-e-se-esse-i-si-esse-o-so-esse-u-su",
     "estampa",
     "esteira",
     "estojo",
