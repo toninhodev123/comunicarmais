@@ -19,6 +19,15 @@ export function useScrollSuave() {
     };
     frame = requestAnimationFrame(passo);
 
+    // A landing cresce depois de montada (fonte carregada, galeria fixa
+    // medindo o próprio percurso, uma pergunta do FAQ abrindo). O Lenis guarda
+    // o limite da página na primeira medida, e sem remedir ele trava a rolagem
+    // na altura antiga — era o que impedia de chegar no fim do site.
+    const remedir = () => lenis.resize();
+    const observador = new ResizeObserver(remedir);
+    observador.observe(document.body);
+    window.addEventListener("load", remedir);
+
     // Links de âncora (#mascotes, #pontos...) deslizam em vez de saltar.
     const aoClicar = (evento: MouseEvent) => {
       const alvo = (evento.target as HTMLElement | null)?.closest<HTMLAnchorElement>(
@@ -35,6 +44,8 @@ export function useScrollSuave() {
 
     return () => {
       document.removeEventListener("click", aoClicar);
+      window.removeEventListener("load", remedir);
+      observador.disconnect();
       cancelAnimationFrame(frame);
       lenis.destroy();
     };

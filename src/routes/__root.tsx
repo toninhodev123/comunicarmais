@@ -121,7 +121,7 @@ function RootComponent() {
 }
 
 /** Páginas abertas a quem ainda não entrou: a landing e o próprio login. */
-const ROTAS_PUBLICAS = ["/", "/entrar"];
+const ROTAS_PUBLICAS = ["/", "/entrar", "/privacidade", "/termos"];
 
 function AppShell() {
   const { session, authCarregando } = useApp();

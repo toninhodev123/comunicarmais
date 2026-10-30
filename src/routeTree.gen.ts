@@ -17,6 +17,8 @@ import { Route as FonemasRouteImport } from './routes/fonemas'
 import { Route as HabilidadesSociaisRouteImport } from './routes/habilidades-sociais'
 import { Route as MemoriaRouteImport } from './routes/memoria'
 import { Route as PersonalizarRouteImport } from './routes/personalizar'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as VocabularioRouteImport } from './routes/vocabulario'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +61,16 @@ const PersonalizarRoute = PersonalizarRouteImport.update({
   path: '/personalizar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VocabularioRoute = VocabularioRouteImport.update({
   id: '/vocabulario',
   path: '/vocabulario',
@@ -74,6 +86,8 @@ export interface FileRoutesByFullPath {
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
   '/personalizar': typeof PersonalizarRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +99,8 @@ export interface FileRoutesByTo {
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
   '/personalizar': typeof PersonalizarRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
 export interface FileRoutesById {
@@ -97,6 +113,8 @@ export interface FileRoutesById {
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
   '/personalizar': typeof PersonalizarRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +128,8 @@ export interface FileRouteTypes {
     | '/habilidades-sociais'
     | '/memoria'
     | '/personalizar'
+    | '/privacidade'
+    | '/termos'
     | '/vocabulario'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +141,8 @@ export interface FileRouteTypes {
     | '/habilidades-sociais'
     | '/memoria'
     | '/personalizar'
+    | '/privacidade'
+    | '/termos'
     | '/vocabulario'
   id:
     | '__root__'
@@ -132,6 +154,8 @@ export interface FileRouteTypes {
     | '/habilidades-sociais'
     | '/memoria'
     | '/personalizar'
+    | '/privacidade'
+    | '/termos'
     | '/vocabulario'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +168,8 @@ export interface RootRouteChildren {
   HabilidadesSociaisRoute: typeof HabilidadesSociaisRoute
   MemoriaRoute: typeof MemoriaRoute
   PersonalizarRoute: typeof PersonalizarRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  TermosRoute: typeof TermosRoute
   VocabularioRoute: typeof VocabularioRoute
 }
 
@@ -205,6 +231,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PersonalizarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vocabulario': {
       id: '/vocabulario'
       path: '/vocabulario'
@@ -224,6 +264,8 @@ const rootRouteChildren: RootRouteChildren = {
   HabilidadesSociaisRoute: HabilidadesSociaisRoute,
   MemoriaRoute: MemoriaRoute,
   PersonalizarRoute: PersonalizarRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  TermosRoute: TermosRoute,
   VocabularioRoute: VocabularioRoute,
 }
 export const routeTree = rootRouteImport

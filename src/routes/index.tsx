@@ -41,6 +41,9 @@ import {
 import { Mascote } from "@/components/landing/mascotes";
 import { Brincadeira } from "@/components/landing/brincadeira";
 import { ExploradorDeFonemas } from "@/components/landing/explorador";
+import { TesteDeMicrofone } from "@/components/landing/teste-microfone";
+import { MontadorDePlano } from "@/components/landing/plano";
+import { Rodape } from "@/components/landing/rodape";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -285,7 +288,9 @@ function Landing() {
       <Brincadeira />
       <Metodologia />
       <ExploradorDeFonemas />
+      <TesteDeMicrofone />
       <RotinaDeEstudo />
+      <MontadorDePlano />
       <Pontuacao />
       <Atividades />
       <TelasDoApp />
@@ -319,6 +324,8 @@ function Topo() {
     { href: "#brincar", texto: "Brincar" },
     { href: "#estrelinhas", texto: "Estrelinhas" },
     { href: "#estudar", texto: "Estudar" },
+    { href: "#testar", texto: "Testar" },
+    { href: "#plano", texto: "Plano" },
     { href: "#atividades", texto: "Atividades" },
     { href: "#vozes", texto: "Vozes" },
     { href: "#perguntas", texto: "Perguntas" },
@@ -1989,36 +1996,5 @@ function RotinaDeEstudo() {
         </div>
       </Reveal>
     </section>
-  );
-}
-
-function Rodape() {
-  return (
-    <footer className="border-t border-border px-4 py-10">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="text-center sm:text-left">
-          <p className="font-display text-lg font-bold">
-            Comunicar<span className="text-primary">+</span>
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Apoio fonoaudiológico interativo — não substitui acompanhamento profissional.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-semibold text-muted-foreground">
-          <a href="#mascotes" className="transition-colors hover:text-foreground">
-            Mascotes
-          </a>
-          <a href="#atividades" className="transition-colors hover:text-foreground">
-            Atividades
-          </a>
-          <a href="#vozes" className="transition-colors hover:text-foreground">
-            Vozes
-          </a>
-          <a href="#perguntas" className="transition-colors hover:text-foreground">
-            Perguntas
-          </a>
-        </div>
-      </div>
-    </footer>
   );
 }

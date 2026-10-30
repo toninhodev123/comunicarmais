@@ -115,7 +115,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -127,7 +130,8 @@
     border-radius: 0.75rem;
   }
 
-  button, a {
+  button,
+  a {
     -webkit-tap-highlight-color: transparent;
   }
 }
@@ -136,7 +140,6 @@
   min-height: 3.5rem;
   min-width: 3.5rem;
 }
-
 
 /* Faixa de palavras da landing: desliza metade da lista (que é duplicada),
    então a emenda cai exatamente no ponto de repetição. */
@@ -152,5 +155,29 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-\[esteira_38s_linear_infinite\] {
     animation: none;
+  }
+}
+
+/* Imprimir o plano da semana: as outras seções saem do fluxo (só esconder
+   com visibility deixaria 25 páginas em branco), e os controles de montar não
+   vão para o papel. #plano é filho direto da raiz da landing. */
+@media print {
+  #topo > *:not(#plano) {
+    display: none !important;
+  }
+
+  #plano {
+    padding: 0 !important;
+  }
+
+  #plano [data-so-tela] {
+    display: none !important;
+  }
+
+  #plano * {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
   }
 }
