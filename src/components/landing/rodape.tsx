@@ -12,7 +12,7 @@ export const EMPRESA = {
   nome: "CCO Software",
   site: "https://ccosoftwarelab.com/",
   siteRotulo: "ccosoftwarelab.com",
-  email: "contato@ccosoftwarelab.com",
+  email: "support@ccosoftwares.com",
 };
 
 const COLUNAS = [
