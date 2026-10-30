@@ -36,6 +36,10 @@ on:
         description: Só listar as vozes disponíveis (não grava nada)
         type: boolean
         default: false
+      ritmo:
+        description: "Velocidade da fala no Edge (padrão 0.92; menor = mais devagar)"
+        type: string
+        required: false
 
 jobs:
   gravar:
@@ -61,6 +65,7 @@ jobs:
           FORCAR: ${{ inputs.forcar }}
           LISTAR: ${{ inputs.listar_vozes }}
           BANCO: ${{ inputs.banco }}
+          RITMO: ${{ inputs.ritmo }}
         run: |
           set -euo pipefail
           args=("--provedor=$PROVEDOR")
@@ -72,6 +77,7 @@ jobs:
           [ -n "$VOZ" ] && args+=("--voz=$VOZ")
           [ "$SO" != "todos" ] && args+=("--so=$SO")
           [ "$FORCAR" = "true" ] && args+=("--forcar")
+          [ -n "$RITMO" ] && args+=("--ritmo=$RITMO")
           bun run audio -- "${args[@]}"
 
       - name: Comitar o que foi gravado
