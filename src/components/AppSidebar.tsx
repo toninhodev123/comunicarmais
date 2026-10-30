@@ -1,5 +1,18 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Mic, BookOpen, Brain, Sparkles, Users, Settings, LogOut, Ear } from "lucide-react";
+import {
+  Home,
+  Mic,
+  BookOpen,
+  Brain,
+  Sparkles,
+  Users,
+  Settings,
+  LogOut,
+  Ear,
+  Headphones,
+  Image,
+  Wind,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +32,9 @@ const items = [
   { title: "Início", url: "/app", icon: Home },
   { title: "Banco de Palavras", url: "/fonemas", icon: Mic },
   { title: "Pares Mínimos", url: "/pares", icon: Ear },
+  { title: "Igual ou Diferente", url: "/discriminacao", icon: Headphones },
+  { title: "Que figura é essa?", url: "/nomear", icon: Image },
+  { title: "Sopro e Respiração", url: "/sopro", icon: Wind },
   { title: "Vocabulário", url: "/vocabulario", icon: BookOpen },
   { title: "Memória Auditiva", url: "/memoria", icon: Brain },
   { title: "Trava-Línguas", url: "/desafios", icon: Sparkles },

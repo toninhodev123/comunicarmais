@@ -12,13 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as DesafiosRouteImport } from './routes/desafios'
+import { Route as DiscriminacaoRouteImport } from './routes/discriminacao'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as FonemasRouteImport } from './routes/fonemas'
 import { Route as HabilidadesSociaisRouteImport } from './routes/habilidades-sociais'
 import { Route as MemoriaRouteImport } from './routes/memoria'
+import { Route as NomearRouteImport } from './routes/nomear'
 import { Route as ParesRouteImport } from './routes/pares'
 import { Route as PersonalizarRouteImport } from './routes/personalizar'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as SoproRouteImport } from './routes/sopro'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as VocabularioRouteImport } from './routes/vocabulario'
 
@@ -35,6 +38,11 @@ const AppRoute = AppRouteImport.update({
 const DesafiosRoute = DesafiosRouteImport.update({
   id: '/desafios',
   path: '/desafios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscriminacaoRoute = DiscriminacaoRouteImport.update({
+  id: '/discriminacao',
+  path: '/discriminacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntrarRoute = EntrarRouteImport.update({
@@ -57,6 +65,11 @@ const MemoriaRoute = MemoriaRouteImport.update({
   path: '/memoria',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NomearRoute = NomearRouteImport.update({
+  id: '/nomear',
+  path: '/nomear',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParesRoute = ParesRouteImport.update({
   id: '/pares',
   path: '/pares',
@@ -70,6 +83,11 @@ const PersonalizarRoute = PersonalizarRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SoproRoute = SoproRouteImport.update({
+  id: '/sopro',
+  path: '/sopro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -87,13 +105,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/desafios': typeof DesafiosRoute
+  '/discriminacao': typeof DiscriminacaoRoute
   '/entrar': typeof EntrarRoute
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
+  '/nomear': typeof NomearRoute
   '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sopro': typeof SoproRoute
   '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
@@ -101,13 +122,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/desafios': typeof DesafiosRoute
+  '/discriminacao': typeof DiscriminacaoRoute
   '/entrar': typeof EntrarRoute
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
+  '/nomear': typeof NomearRoute
   '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sopro': typeof SoproRoute
   '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
@@ -116,13 +140,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
   '/desafios': typeof DesafiosRoute
+  '/discriminacao': typeof DiscriminacaoRoute
   '/entrar': typeof EntrarRoute
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
+  '/nomear': typeof NomearRoute
   '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sopro': typeof SoproRoute
   '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
@@ -132,13 +159,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/desafios'
+    | '/discriminacao'
     | '/entrar'
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
+    | '/nomear'
     | '/pares'
     | '/personalizar'
     | '/privacidade'
+    | '/sopro'
     | '/termos'
     | '/vocabulario'
   fileRoutesByTo: FileRoutesByTo
@@ -146,13 +176,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/desafios'
+    | '/discriminacao'
     | '/entrar'
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
+    | '/nomear'
     | '/pares'
     | '/personalizar'
     | '/privacidade'
+    | '/sopro'
     | '/termos'
     | '/vocabulario'
   id:
@@ -160,13 +193,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/desafios'
+    | '/discriminacao'
     | '/entrar'
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
+    | '/nomear'
     | '/pares'
     | '/personalizar'
     | '/privacidade'
+    | '/sopro'
     | '/termos'
     | '/vocabulario'
   fileRoutesById: FileRoutesById
@@ -175,13 +211,16 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
   DesafiosRoute: typeof DesafiosRoute
+  DiscriminacaoRoute: typeof DiscriminacaoRoute
   EntrarRoute: typeof EntrarRoute
   FonemasRoute: typeof FonemasRoute
   HabilidadesSociaisRoute: typeof HabilidadesSociaisRoute
   MemoriaRoute: typeof MemoriaRoute
+  NomearRoute: typeof NomearRoute
   ParesRoute: typeof ParesRoute
   PersonalizarRoute: typeof PersonalizarRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  SoproRoute: typeof SoproRoute
   TermosRoute: typeof TermosRoute
   VocabularioRoute: typeof VocabularioRoute
 }
@@ -207,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/desafios'
       fullPath: '/desafios'
       preLoaderRoute: typeof DesafiosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discriminacao': {
+      id: '/discriminacao'
+      path: '/discriminacao'
+      fullPath: '/discriminacao'
+      preLoaderRoute: typeof DiscriminacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entrar': {
@@ -237,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nomear': {
+      id: '/nomear'
+      path: '/nomear'
+      fullPath: '/nomear'
+      preLoaderRoute: typeof NomearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pares': {
       id: '/pares'
       path: '/pares'
@@ -256,6 +309,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sopro': {
+      id: '/sopro'
+      path: '/sopro'
+      fullPath: '/sopro'
+      preLoaderRoute: typeof SoproRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -279,13 +339,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
   DesafiosRoute: DesafiosRoute,
+  DiscriminacaoRoute: DiscriminacaoRoute,
   EntrarRoute: EntrarRoute,
   FonemasRoute: FonemasRoute,
   HabilidadesSociaisRoute: HabilidadesSociaisRoute,
   MemoriaRoute: MemoriaRoute,
+  NomearRoute: NomearRoute,
   ParesRoute: ParesRoute,
   PersonalizarRoute: PersonalizarRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  SoproRoute: SoproRoute,
   TermosRoute: TermosRoute,
   VocabularioRoute: VocabularioRoute,
 }

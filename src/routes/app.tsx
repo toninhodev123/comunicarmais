@@ -1,7 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { BookOpen, Brain, Ear, Flame, Mic, Sparkles, Star, Users } from "lucide-react";
+import {
+  BookOpen,
+  Brain,
+  Ear,
+  Flame,
+  Headphones,
+  Image,
+  Mic,
+  Sparkles,
+  Star,
+  Users,
+  Wind,
+} from "lucide-react";
 import { useApp, mascots, PRACTICE_AREAS, type MascotId } from "@/context/AppContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,6 +81,27 @@ const shortcuts = [
     url: "/habilidades-sociais",
     icon: Users,
     color: "oklch(0.78 0.13 340)",
+  },
+  {
+    title: "Igual ou Diferente",
+    desc: "Duas palavras: a mesma, ou mudou o som?",
+    url: "/discriminacao",
+    icon: Headphones,
+    color: "oklch(0.78 0.13 90)",
+  },
+  {
+    title: "Que figura é essa?",
+    desc: "Só a imagem — a palavra sai da criança.",
+    url: "/nomear",
+    icon: Image,
+    color: "oklch(0.78 0.13 320)",
+  },
+  {
+    title: "Sopro e Respiração",
+    desc: "Ar firme para a frase não morrer no fim.",
+    url: "/sopro",
+    icon: Wind,
+    color: "oklch(0.80 0.11 210)",
   },
 ] as const;
 
