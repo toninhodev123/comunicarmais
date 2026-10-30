@@ -13,16 +13,26 @@ export function useScrollSuave() {
 
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
     let frame = 0;
+
+    // O Lenis guarda o limite da página na medida que fez por último. A landing
+    // cresce depois de montada (fonte carregando, a galeria que fixa na tela
+    // medindo o próprio percurso, uma pergunta do FAQ abrindo) e, com o limite
+    // antigo, a rolagem batia numa parede invisível antes do rodapé. Conferir a
+    // altura a cada quadro é uma leitura só e não depende de nenhum observador
+    // disparar na hora certa.
+    let alturaConhecida = 0;
     const passo = (tempo: number) => {
+      const altura = document.documentElement.scrollHeight;
+      if (altura !== alturaConhecida) {
+        alturaConhecida = altura;
+        lenis.resize();
+      }
       lenis.raf(tempo);
       frame = requestAnimationFrame(passo);
     };
     frame = requestAnimationFrame(passo);
 
-    // A landing cresce depois de montada (fonte carregada, galeria fixa
-    // medindo o próprio percurso, uma pergunta do FAQ abrindo). O Lenis guarda
-    // o limite da página na primeira medida, e sem remedir ele trava a rolagem
-    // na altura antiga — era o que impedia de chegar no fim do site.
+    // Reforço: mudança de largura (girar o celular) sem mudança de altura.
     const remedir = () => lenis.resize();
     const observador = new ResizeObserver(remedir);
     observador.observe(document.body);
