@@ -349,25 +349,48 @@ export function limiteDaFrase(alvo: string) {
   return Math.max(0.75, (total - perdoadas) / total);
 }
 
-// Confere uma frase palavra por palavra: cada ocorrência de cada palavra alvo
-// precisa aparecer no que foi ouvido (palavras repetidas contam cada vez) e o
-// acerto precisa alcançar `limite` do total.
-export function fraseCorresponde(transcricao: string, alvo: string, limite = limiteDaFrase(alvo)) {
+/**
+ * Duas palavras contam como a mesma?
+ *
+ * Aqui não dá para ser generoso de qualquer jeito: o app existe para separar
+ * sons parecidos, e aceitar "bolo" no lugar de "bola" estragaria o exercício.
+ * Então a folga é só nas pontas, onde o reconhecimento costuma escorregar — ele
+ * devolve plural, ou um pedacinho a mais colado ("bicicletas", "bolinha"), ou
+ * corta a última letra. O começo da palavra, que é onde os pares mínimos se
+ * distinguem, continua tendo de bater.
+ */
+function palavraBate(ouvida: string, alvo: string) {
+  if (ouvida === alvo) return true;
+  if (alvo.length < 4) return false;
+  if (ouvida.startsWith(alvo) && ouvida.length - alvo.length <= 2) return true;
+  if (alvo.startsWith(ouvida) && alvo.length - ouvida.length <= 1) return true;
+  return false;
+}
+
+/**
+ * Quanto da frase alvo apareceu no que foi ouvido, de 0 a 1. Cada ocorrência de
+ * cada palavra conta uma vez (palavras repetidas contam cada vez).
+ */
+export function proximidadeDaFrase(transcricao: string, alvo: string) {
   const palavrasAlvo = normalizarTexto(alvo).split(" ").filter(Boolean);
-  if (palavrasAlvo.length === 0) return false;
+  if (palavrasAlvo.length === 0) return 0;
   const palavrasOuvidas = normalizarTexto(transcricao).split(" ").filter(Boolean);
-  if (palavrasOuvidas.length === 0) return false;
+  if (palavrasOuvidas.length === 0) return 0;
 
-  const restantes = new Map<string, number>();
-  for (const p of palavrasOuvidas) restantes.set(p, (restantes.get(p) ?? 0) + 1);
-
+  const disponiveis = [...palavrasOuvidas];
   let acertadas = 0;
   for (const p of palavrasAlvo) {
-    const quantidade = restantes.get(p) ?? 0;
-    if (quantidade > 0) {
+    const i = disponiveis.findIndex((o) => palavraBate(o, p));
+    if (i >= 0) {
       acertadas++;
-      restantes.set(p, quantidade - 1);
+      disponiveis.splice(i, 1);
     }
   }
-  return acertadas / palavrasAlvo.length >= limite;
+  return acertadas / palavrasAlvo.length;
+}
+
+// Confere uma frase palavra por palavra: o acerto precisa alcançar `limite` do
+// total de palavras do alvo.
+export function fraseCorresponde(transcricao: string, alvo: string, limite = limiteDaFrase(alvo)) {
+  return proximidadeDaFrase(transcricao, alvo) >= limite;
 }

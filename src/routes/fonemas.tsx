@@ -3,7 +3,15 @@ import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { Volume2, MessageCircleQuestion, Star, Mic } from "lucide-react";
 import { phonemes, type Position } from "@/lib/data/phonemes";
-import { falar, ouvir, palavraCorresponde, tocarSucesso, tocarErro } from "@/lib/voz";
+import {
+  falar,
+  ouvir,
+  palavraCorresponde,
+  proximidadeDaFrase,
+  tocarErro,
+  tocarSucesso,
+} from "@/lib/voz";
+import { fraseDeIncentivo } from "@/lib/incentivo";
 import { useApp } from "@/context/AppContext";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -63,7 +71,7 @@ function PhonemesPage() {
           tocarSucesso();
         } else {
           tocarErro();
-          toast("Quase! Tente falar de novo.", { icon: "💪" });
+          toast(fraseDeIncentivo(proximidadeDaFrase(transcript, word)), { icon: "💪" });
         }
       },
       onEnd: () => setListeningWord(null),

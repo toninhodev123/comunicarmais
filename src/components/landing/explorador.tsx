@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Lightbulb, Volume2 } from "lucide-react";
-import { phonemes, type Position } from "@/lib/data/phonemes";
+import { phonemes, silabasDe, type Position } from "@/lib/data/phonemes";
 import { falar } from "@/lib/voz";
 import { Reveal } from "@/components/landing/animacoes";
 
@@ -97,13 +97,16 @@ export function ExploradorDeFonemas() {
                 <p className="font-display text-sm font-bold uppercase tracking-wider">
                   {fonema.name}
                 </p>
+                <p className="mt-1 text-xs font-semibold text-muted-foreground">
+                  {fonema.classification}
+                </p>
                 <p className="mt-3 text-base leading-relaxed">{fonema.mouthInstruction}</p>
                 <p className="mt-4 flex gap-2 rounded-2xl bg-card px-4 py-3 text-sm">
                   <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-warm-foreground" />
                   {fonema.mouthTip}
                 </p>
                 <button
-                  onClick={() => ouvir(`${fonema.letter}a, ${fonema.letter}e, ${fonema.letter}i`)}
+                  onClick={() => ouvir(silabasDe(fonema))}
                   className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-card text-base font-bold shadow-sm transition-transform hover:scale-[1.02]"
                 >
                   <Volume2 className="h-5 w-5" /> Ouvir as sílabas

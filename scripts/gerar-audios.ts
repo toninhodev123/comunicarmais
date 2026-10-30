@@ -28,7 +28,7 @@ import path from "node:path";
 import process from "node:process";
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 
-import { phonemes } from "../src/lib/data/phonemes";
+import { phonemes, silabasDe } from "../src/lib/data/phonemes";
 import { categories } from "../src/lib/data/vocabulary";
 import { tongueTwisters } from "../src/lib/data/tongueTwisters";
 import { socialPhrases } from "../src/lib/data/socialSkills";
@@ -73,7 +73,7 @@ function textosDoApp(): Texto[] {
   for (const fonema of phonemes) {
     for (const w of fonema.words) add(w.word, "palavras");
     // Botão "ouvir as sílabas" da tela de fonemas.
-    add(`${fonema.letter}a, ${fonema.letter}e, ${fonema.letter}i`, "palavras");
+    add(silabasDe(fonema), "palavras");
   }
   for (const categoria of categories) {
     for (const item of categoria.items) {

@@ -4,7 +4,8 @@ import confetti from "canvas-confetti";
 import { motion } from "motion/react";
 import { Volume2, PartyPopper, Mic, Timer, Play, Pause, RotateCcw, Trophy } from "lucide-react";
 import { tongueTwisters } from "@/lib/data/tongueTwisters";
-import { falar, ouvir, fraseCorresponde, tocarErro } from "@/lib/voz";
+import { falar, fraseCorresponde, ouvir, proximidadeDaFrase, tocarErro } from "@/lib/voz";
+import { fraseDeIncentivo } from "@/lib/incentivo";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
@@ -158,12 +159,8 @@ function ChallengesPage() {
           comemorar(t.id);
         } else {
           tocarErro();
-          toast(
-            transcript ? `Ouvi: "${transcript}". Vamos de novo!` : "Não ouvi nada. Tenta de novo!",
-            {
-              icon: "💪",
-            },
-          );
+          // Nunca devolvemos o que o microfone entendeu: vem um empurrão.
+          toast(fraseDeIncentivo(proximidadeDaFrase(transcript, t.text)), { icon: "💪" });
         }
       },
       onEnd: () => setListeningId(null),

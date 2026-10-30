@@ -11,6 +11,8 @@ export interface Phoneme {
   letter: string;
   name: string;
   color: string;
+  /** Como a fonoaudiologia nomeia o som: ponto, modo e vozeamento. */
+  classification: string;
   mouthInstruction: string;
   mouthTip: string;
   words: Word[];
@@ -22,9 +24,11 @@ export const phonemes: Phoneme[] = [
     letter: "B",
     name: "Fonema B",
     color: "oklch(0.75 0.15 20)",
+    classification: "Oclusiva bilabial sonora",
     mouthInstruction:
-      "Igual ao P, mas com a voz ligada: junte os lábios, solte o ar e deixe a garganta vibrar.",
-    mouthTip: "Coloque a mão na garganta: você sente vibrar ao falar B!",
+      "Feche os lábios, acumule o ar atrás deles e solte de uma vez, com a voz ligada. É o mesmo movimento do P, acrescido da vibração das pregas vocais.",
+    mouthTip:
+      "Com a mão apoiada na garganta, o B vibra e o P não. Alternar os dois ajuda a perceber a diferença.",
     words: [
       { word: "BOLA", position: "inicio", emoji: "⚽" },
       { word: "BOLO", position: "inicio", emoji: "🎂" },
@@ -61,9 +65,11 @@ export const phonemes: Phoneme[] = [
     letter: "P",
     name: "Fonema P",
     color: "oklch(0.78 0.14 30)",
+    classification: "Oclusiva bilabial surda",
     mouthInstruction:
-      "Junte os lábios firmes, segure o ar atrás deles e solte de uma vez com um pequeno 'puff'.",
-    mouthTip: "Coloque a mão na frente da boca: você sente o ventinho ao falar P!",
+      "Feche os lábios, acumule o ar atrás deles e libere de uma vez, sem usar a voz. O som é breve e sai todo no momento da soltura.",
+    mouthTip:
+      "Com a mão espalmada à frente da boca, sente-se o jato de ar no instante em que os lábios se abrem.",
     words: [
       { word: "PATO", position: "inicio", emoji: "🦆" },
       { word: "PIPA", position: "inicio", emoji: "🪁" },
@@ -98,9 +104,10 @@ export const phonemes: Phoneme[] = [
     letter: "D",
     name: "Fonema D",
     color: "oklch(0.7 0.14 320)",
+    classification: "Oclusiva alveolar sonora",
     mouthInstruction:
-      "Igual ao T, mas com a voz ligada. Língua atrás dos dentes de cima e som forte.",
-    mouthTip: "Coloque a mão na garganta: você sente a vibração ao falar D!",
+      "Apoie a ponta da língua logo atrás dos dentes superiores, bloqueie a passagem do ar e solte, mantendo a voz ligada.",
+    mouthTip: "A posição da língua é a mesma do T. O que muda é a vibração da garganta.",
     words: [
       { word: "DEDO", position: "inicio", emoji: "👆" },
       { word: "DADO", position: "inicio", emoji: "🎲" },
@@ -133,9 +140,11 @@ export const phonemes: Phoneme[] = [
     letter: "T",
     name: "Fonema T",
     color: "oklch(0.75 0.13 290)",
+    classification: "Oclusiva alveolar surda",
     mouthInstruction:
-      "Toque a ponta da língua atrás dos dentes de cima, segure o ar e solte rápido.",
-    mouthTip: "É um som curtinho: 'tá', 'té', 'ti'. Sem ventinho longo!",
+      "Apoie a ponta da língua logo atrás dos dentes superiores, segure o ar e libere rapidamente, sem voz.",
+    mouthTip:
+      "A soltura é curta e seca. Se o som se alongar, a língua saiu do lugar antes da hora.",
     words: [
       { word: "TATU", position: "inicio", emoji: "🦔" },
       { word: "TIGRE", position: "inicio", emoji: "🐯" },
@@ -166,9 +175,10 @@ export const phonemes: Phoneme[] = [
     letter: "Z",
     name: "Fonema Z",
     color: "oklch(0.75 0.15 95)",
+    classification: "Fricativa alveolar sonora",
     mouthInstruction:
-      "Igual ao S, mas com a voz ligada: dentes quase fechados e a garganta vibrando.",
-    mouthTip: "É como o zumbido de uma abelha: zzzzzz!",
+      "Aproxime os dentes, mantenha a língua atrás dos dentes inferiores e deixe o ar passar por um canal estreito, com a voz ligada. O som é contínuo.",
+    mouthTip: "Dá para sustentar o Z enquanto houver fôlego — é o zumbido da abelha.",
     words: [
       { word: "ZEBRA", position: "inicio", emoji: "🦓" },
       { word: "ZOOLÓGICO", position: "inicio", emoji: "🦁" },
@@ -198,9 +208,11 @@ export const phonemes: Phoneme[] = [
     letter: "S",
     name: "Fonema S",
     color: "oklch(0.72 0.1 190)",
+    classification: "Fricativa alveolar surda",
     mouthInstruction:
-      "Dentes quase fechados, língua atrás dos dentes de baixo, e sopre o ar sem usar a voz.",
-    mouthTip: "É um som de cobra, sem vibrar a garganta: sssssss!",
+      "Mesma posição do Z — dentes próximos e língua atrás dos dentes inferiores —, mas com o ar passando sem voz.",
+    mouthTip:
+      "Alterne S e Z com a mão na garganta: a boca não muda de posição, só a vibração entra e sai.",
     words: [
       { word: "SAPO", position: "inicio", emoji: "🐸" },
       { word: "SALA", position: "inicio", emoji: "🛋️" },
@@ -234,8 +246,10 @@ export const phonemes: Phoneme[] = [
     letter: "J",
     name: "Fonema J",
     color: "oklch(0.75 0.14 65)",
-    mouthInstruction: "Igual ao CH, mas com a voz ligada: lábios arredondados e garganta vibrando.",
-    mouthTip: "Sinta a vibração na garganta enquanto fala J!",
+    classification: "Fricativa pós-alveolar sonora",
+    mouthInstruction:
+      "Projete levemente os lábios, recue a parte da frente da língua em direção ao céu da boca e deixe o ar escapar de forma contínua, com a voz ligada.",
+    mouthTip: "É o CH com voz. Sustente o som e ligue a garganta para sentir a troca.",
     words: [
       { word: "JANELA", position: "inicio", emoji: "🪟" },
       { word: "JARDIM", position: "inicio", emoji: "🌷" },
@@ -267,9 +281,10 @@ export const phonemes: Phoneme[] = [
     letter: "CH",
     name: "Fonema CH",
     color: "oklch(0.72 0.15 335)",
+    classification: "Fricativa pós-alveolar surda",
     mouthInstruction:
-      "Arredonde os lábios como um bico e deixe o ar sair devagar por um cantinho só, sem tocar os dentes.",
-    mouthTip: "É o som de pedir silêncio: shhh!",
+      "Projete os lábios, aproxime a parte da frente da língua do céu da boca e deixe o ar sair por uma fenda estreita, sem voz.",
+    mouthTip: "É o gesto de pedir silêncio. O ar sai contínuo, nunca em estouro.",
     words: [
       { word: "CHUVA", position: "inicio", emoji: "🌧️" },
       { word: "CHAVE", position: "inicio", emoji: "🔑" },
@@ -299,9 +314,11 @@ export const phonemes: Phoneme[] = [
     letter: "R",
     name: "Fonema R",
     color: "oklch(0.7 0.18 25)",
+    classification: "Tepe alveolar (e vibrante no início da palavra)",
     mouthInstruction:
-      "Levante a ponta da língua atrás dos dentes de cima e faça vibrar com um sopro forte.",
-    mouthTip: "Tente imitar o ronco de um motor: rrrrrrr!",
+      "Entre vogais, a ponta da língua toca uma única vez a região atrás dos dentes superiores — um toque rápido e leve. No início da palavra, o som é produzido mais atrás, na garganta.",
+    mouthTip:
+      "Palavras com o R entre vogais são o melhor ponto de partida: o toque único é mais fácil que a vibração.",
     words: [
       { word: "RATO", position: "inicio", emoji: "🐭" },
       { word: "ROSA", position: "inicio", emoji: "🌹" },
@@ -343,9 +360,10 @@ export const phonemes: Phoneme[] = [
     letter: "L",
     name: "Fonema L",
     color: "oklch(0.72 0.14 145)",
+    classification: "Lateral alveolar sonora",
     mouthInstruction:
-      "Encoste a ponta da língua no céu da boca, atrás dos dentes de cima, e solte a voz.",
-    mouthTip: "A língua fica grudada em cima e o som sai pelos lados.",
+      "Encoste a ponta da língua atrás dos dentes superiores e mantenha-a apoiada enquanto a voz sai pelas laterais da língua.",
+    mouthTip: "A língua fica apoiada durante todo o som — diferente do T e do D, em que ela solta.",
     words: [
       { word: "LUA", position: "inicio", emoji: "🌙" },
       { word: "LAGO", position: "inicio", emoji: "🏞️" },
@@ -386,9 +404,11 @@ export const phonemes: Phoneme[] = [
     letter: "LH",
     name: "Fonema LH",
     color: "oklch(0.68 0.12 170)",
+    classification: "Lateral palatal sonora",
     mouthInstruction:
-      "Encoste o meio da língua no céu da boca e solte a voz, como um L bem molhadinho.",
-    mouthTip: "A língua fica espalhada no céu da boca — bem diferente do L sozinho!",
+      "Eleve o corpo da língua contra o céu da boca, numa área ampla, e deixe a voz sair pelos lados. A ponta da língua permanece abaixada.",
+    mouthTip:
+      "No L trabalha a ponta da língua; no LH, o meio. Alternar “la” e “lha” ajuda a perceber.",
     words: [
       { word: "BILHETE", position: "meio", emoji: "🎫" },
       { word: "PALHAÇO", position: "meio", emoji: "🤡" },
@@ -415,9 +435,10 @@ export const phonemes: Phoneme[] = [
     letter: "F",
     name: "Fonema F",
     color: "oklch(0.75 0.13 220)",
+    classification: "Fricativa labiodental surda",
     mouthInstruction:
-      "Encoste os dentes de cima no lábio de baixo e sopre o ar devagar, como um vento fininho.",
-    mouthTip: "É um som longo e contínuo: ffffff. Sem voz na garganta!",
+      "Apoie os dentes superiores sobre o lábio inferior e deixe o ar passar continuamente, sem voz.",
+    mouthTip: "O som se sustenta enquanto houver ar. Se terminar em estouro, virou P.",
     words: [
       { word: "FACA", position: "inicio", emoji: "🔪" },
       { word: "FOGO", position: "inicio", emoji: "🔥" },
@@ -435,8 +456,10 @@ export const phonemes: Phoneme[] = [
     letter: "V",
     name: "Fonema V",
     color: "oklch(0.7 0.14 260)",
-    mouthInstruction: "Igual ao F, dentes de cima no lábio de baixo, mas agora com a voz vibrando.",
-    mouthTip: "Som contínuo e com vibração: vvvvvv.",
+    classification: "Fricativa labiodental sonora",
+    mouthInstruction:
+      "Mesma posição do F — dentes superiores sobre o lábio inferior —, agora com as pregas vocais vibrando.",
+    mouthTip: "Sustente o F e ligue a voz sem mexer a boca: o som vira V.",
     words: [
       { word: "VACA", position: "inicio", emoji: "🐄" },
       { word: "VELA", position: "inicio", emoji: "🕯️" },
@@ -448,3 +471,15 @@ export const phonemes: Phoneme[] = [
     ],
   },
 ];
+
+/**
+ * A série de sílabas do botão "ouvir as sílabas": cada sílaba dita duas vezes,
+ * com as cinco vogais — ba ba, be be, bi bi, bo bo, bu bu. É como o treino
+ * costuma ser conduzido, e repetir dá à criança tempo de acompanhar.
+ */
+export const VOGAIS = ["a", "e", "i", "o", "u"] as const;
+
+export function silabasDe(fonema: Pick<Phoneme, "letter">) {
+  const base = fonema.letter.toLowerCase();
+  return VOGAIS.map((v) => `${base}${v}, ${base}${v}`).join(", ");
+}

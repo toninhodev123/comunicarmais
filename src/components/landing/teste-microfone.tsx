@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Check, Mic, RotateCcw, Volume2, X } from "lucide-react";
-import { falar, fraseCorresponde, limiteDaFrase, ouvir } from "@/lib/voz";
+import { Check, Mic, RotateCcw, Sparkles, Volume2 } from "lucide-react";
+import { falar, fraseCorresponde, limiteDaFrase, ouvir, proximidadeDaFrase } from "@/lib/voz";
+import { fraseDeIncentivo } from "@/lib/incentivo";
 import { Reveal } from "@/components/landing/animacoes";
 
 /**
@@ -24,7 +25,7 @@ type Estado = "parado" | "ouvindo" | "acertou" | "errou";
 export function TesteDeMicrofone() {
   const [indice, setIndice] = useState(0);
   const [estado, setEstado] = useState<Estado>("parado");
-  const [ouvido, setOuvido] = useState("");
+  const [incentivo, setIncentivo] = useState("");
   const [temMicrofone, setTemMicrofone] = useState(true);
   const escutando = useRef(false);
 
@@ -33,18 +34,21 @@ export function TesteDeMicrofone() {
   // Trocar de palavra no meio da escuta deixaria o resultado anterior na tela.
   useEffect(() => {
     setEstado("parado");
-    setOuvido("");
   }, [indice]);
 
   const conferir = (transcricao: string) => {
     escutando.current = false;
-    setOuvido(transcricao);
-    setEstado(fraseCorresponde(transcricao, atual.palavra) ? "acertou" : "errou");
+    if (fraseCorresponde(transcricao, atual.palavra)) {
+      setEstado("acertou");
+      return;
+    }
+    // Errou: nunca devolvemos o que o microfone entendeu — vem um empurrão.
+    setIncentivo(fraseDeIncentivo(proximidadeDaFrase(transcricao, atual.palavra)));
+    setEstado("errou");
   };
 
   const comecar = () => {
     if (escutando.current) return;
-    setOuvido("");
     setEstado("ouvindo");
     escutando.current = true;
     const limite = limiteDaFrase(atual.palavra);
@@ -156,7 +160,7 @@ export function TesteDeMicrofone() {
                           "flex items-center gap-2 rounded-2xl px-5 py-3 font-display text-lg font-bold " +
                           (estado === "acertou"
                             ? "bg-success/15 text-success"
-                            : "bg-destructive/10 text-destructive")
+                            : "bg-warm/25 text-warm-foreground")
                         }
                       >
                         {estado === "acertou" ? (
@@ -165,15 +169,10 @@ export function TesteDeMicrofone() {
                           </>
                         ) : (
                           <>
-                            <X className="h-5 w-5" /> Quase — tenta de novo
+                            <Sparkles className="h-5 w-5" /> {incentivo}
                           </>
                         )}
                       </span>
-                      {ouvido && (
-                        <p className="text-sm text-muted-foreground">
-                          ouvi: <span className="font-semibold">“{ouvido}”</span>
-                        </p>
-                      )}
                       <button
                         onClick={comecar}
                         className="mt-1 flex items-center gap-1.5 text-sm font-bold text-primary"
