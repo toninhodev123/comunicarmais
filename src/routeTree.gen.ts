@@ -16,6 +16,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as FonemasRouteImport } from './routes/fonemas'
 import { Route as HabilidadesSociaisRouteImport } from './routes/habilidades-sociais'
 import { Route as MemoriaRouteImport } from './routes/memoria'
+import { Route as ParesRouteImport } from './routes/pares'
 import { Route as PersonalizarRouteImport } from './routes/personalizar'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as TermosRouteImport } from './routes/termos'
@@ -56,6 +57,11 @@ const MemoriaRoute = MemoriaRouteImport.update({
   path: '/memoria',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParesRoute = ParesRouteImport.update({
+  id: '/pares',
+  path: '/pares',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PersonalizarRoute = PersonalizarRouteImport.update({
   id: '/personalizar',
   path: '/personalizar',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
+  '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
+  '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/fonemas': typeof FonemasRoute
   '/habilidades-sociais': typeof HabilidadesSociaisRoute
   '/memoria': typeof MemoriaRoute
+  '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos': typeof TermosRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
+    | '/pares'
     | '/personalizar'
     | '/privacidade'
     | '/termos'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
+    | '/pares'
     | '/personalizar'
     | '/privacidade'
     | '/termos'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/fonemas'
     | '/habilidades-sociais'
     | '/memoria'
+    | '/pares'
     | '/personalizar'
     | '/privacidade'
     | '/termos'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   FonemasRoute: typeof FonemasRoute
   HabilidadesSociaisRoute: typeof HabilidadesSociaisRoute
   MemoriaRoute: typeof MemoriaRoute
+  ParesRoute: typeof ParesRoute
   PersonalizarRoute: typeof PersonalizarRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosRoute: typeof TermosRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pares': {
+      id: '/pares'
+      path: '/pares'
+      fullPath: '/pares'
+      preLoaderRoute: typeof ParesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/personalizar': {
       id: '/personalizar'
       path: '/personalizar'
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   FonemasRoute: FonemasRoute,
   HabilidadesSociaisRoute: HabilidadesSociaisRoute,
   MemoriaRoute: MemoriaRoute,
+  ParesRoute: ParesRoute,
   PersonalizarRoute: PersonalizarRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   TermosRoute: TermosRoute,

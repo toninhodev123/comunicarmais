@@ -86,6 +86,7 @@ export const themeColors: Record<
 /** Áreas que contam para a meta diária — os ids batem com o `area` usado em adicionarEstrelas(). */
 export const PRACTICE_AREAS = [
   { id: "fonemas", label: "Banco de Palavras" },
+  { id: "pares", label: "Pares Mínimos" },
   { id: "memoria", label: "Memória Auditiva" },
   { id: "desafios", label: "Trava-Línguas" },
   { id: "habilidades", label: "Habilidades Sociais" },

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Mic, BookOpen, Brain, Sparkles, Users, Star, Flame } from "lucide-react";
+import { BookOpen, Brain, Ear, Flame, Mic, Sparkles, Star, Users } from "lucide-react";
 import { useApp, mascots, PRACTICE_AREAS, type MascotId } from "@/context/AppContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,13 @@ const shortcuts = [
     url: "/fonemas",
     icon: Mic,
     color: "oklch(0.78 0.14 30)",
+  },
+  {
+    title: "Pares Mínimos",
+    desc: "Um som muda tudo: faca ou vaca?",
+    url: "/pares",
+    icon: Ear,
+    color: "oklch(0.78 0.13 195)",
   },
   {
     title: "Vocabulário",
