@@ -40,6 +40,7 @@ import {
 } from "@/components/landing/animacoes";
 import { Mascote } from "@/components/landing/mascotes";
 import { Brincadeira } from "@/components/landing/brincadeira";
+import { ExploradorDeFonemas } from "@/components/landing/explorador";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -283,6 +284,8 @@ function Landing() {
       <Mascotes />
       <Brincadeira />
       <Metodologia />
+      <ExploradorDeFonemas />
+      <RotinaDeEstudo />
       <Pontuacao />
       <Atividades />
       <TelasDoApp />
@@ -315,6 +318,7 @@ function Topo() {
     { href: "#mascotes", texto: "Mascotes" },
     { href: "#brincar", texto: "Brincar" },
     { href: "#estrelinhas", texto: "Estrelinhas" },
+    { href: "#estudar", texto: "Estudar" },
     { href: "#atividades", texto: "Atividades" },
     { href: "#vozes", texto: "Vozes" },
     { href: "#perguntas", texto: "Perguntas" },
@@ -470,7 +474,7 @@ function CamadasDeMascotes({ alvo }: { alvo: React.RefObject<HTMLDivElement | nu
   const ponteiro = usePonteiro();
   const girarX = useTransform(ponteiro.y, [-1, 1], [8, -8]);
   const girarY = useTransform(ponteiro.x, [-1, 1], [-10, 10]);
-  const posicoes = ["left-[2%] top-[6%]", "right-[4%] top-[26%]", "left-[20%] bottom-[2%]"];
+  const posicoes = ["left-[0%] top-[14%]", "right-[2%] top-[4%]", "left-[33%] top-[38%]"];
 
   return (
     <div
@@ -517,8 +521,83 @@ function CamadasDeMascotes({ alvo }: { alvo: React.RefObject<HTMLDivElement | nu
             </motion.div>
           </motion.div>
         ))}
+
+        {/* Peças do próprio app flutuando em volta, para o lado direito não
+            ficar com três cards soltos num vazio. */}
+        <motion.div
+          style={{ y: camadaMeio, willChange: "transform" }}
+          className="absolute left-[4%] top-[0%]"
+        >
+          <PecaFlutuante atraso={0.5}>
+            <div className="flex items-center gap-2">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-warm/30">
+                <Flame className="h-5 w-5 fill-warm text-warm" />
+              </span>
+              <div>
+                <p className="font-display text-base font-bold leading-none">7 dias</p>
+                <p className="text-[11px] text-muted-foreground">seguidos</p>
+              </div>
+            </div>
+          </PecaFlutuante>
+        </motion.div>
+
+        <motion.div
+          style={{ y: camadaFrente, willChange: "transform" }}
+          className="absolute bottom-[1%] left-[1%]"
+        >
+          <PecaFlutuante atraso={1.1}>
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 fill-warm text-warm" />
+              <p className="font-display text-base font-bold leading-none">
+                <Contador valor={248} /> ⭐
+              </p>
+            </div>
+            <p className="mt-1 text-[11px] text-muted-foreground">estrelinhas desta semana</p>
+          </PecaFlutuante>
+        </motion.div>
+
+        <motion.div
+          style={{ y: camadaFundo, willChange: "transform" }}
+          className="absolute bottom-[4%] right-[0%]"
+        >
+          <PecaFlutuante atraso={1.7}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Fonema R · no meio
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-2xl" aria-hidden="true">
+                🦋
+              </span>
+              <span className="font-display text-base font-bold">BORBOLETA</span>
+            </div>
+            <div className="mt-2 flex items-center gap-1.5 rounded-xl bg-success/15 px-2 py-1 text-[11px] font-bold text-success">
+              <Check className="h-3.5 w-3.5" /> falou certo
+            </div>
+          </PecaFlutuante>
+        </motion.div>
       </motion.div>
     </div>
+  );
+}
+
+/** Cartãozinho que respira, usado nas peças soltas do topo. */
+function PecaFlutuante({ children, atraso = 0 }: { children: ReactNode; atraso?: number }) {
+  const menosMovimento = useReducedMotion();
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 180, damping: 16, delay: 0.5 + atraso * 0.2 }}
+    >
+      <motion.div
+        animate={menosMovimento ? undefined : { y: [0, -9, 0] }}
+        transition={{ duration: 4.5 + atraso, repeat: Infinity, ease: "easeInOut", delay: atraso }}
+        className="rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-lg backdrop-blur-sm"
+        style={{ willChange: "transform" }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -1818,6 +1897,96 @@ function Privacidade() {
           O reconhecimento de fala usa o serviço do próprio navegador para transformar som em texto;
           o app recebe só o texto e o descarta assim que confere a palavra.
         </p>
+      </Reveal>
+    </section>
+  );
+}
+
+/** Uma rotina sugerida de quatro semanas montada com as atividades do app. */
+function RotinaDeEstudo() {
+  const semanas = [
+    {
+      titulo: "Reconhecer o som",
+      foco: "Banco de Palavras · posição “início”",
+      desc: "A criança ouve o fonema isolado, vê a instrução de boca e repete palavras que começam com ele. Nada de frase ainda.",
+      sinal: "Acertar seis palavras seguidas sem apoio.",
+    },
+    {
+      titulo: "O som em qualquer lugar",
+      foco: "Banco de Palavras · meio e fim + Vocabulário",
+      desc: "O mesmo som no meio e no fim da palavra, que é onde a troca costuma voltar. O vocabulário entra para dar contexto ao que ela nomeia.",
+      sinal: "Meta diária fechada nas duas atividades, três dias seguidos.",
+    },
+    {
+      titulo: "Memória e ritmo",
+      foco: "Memória Auditiva + Trava-Línguas curtos",
+      desc: "Sequências de palavras treinam a retenção auditiva; os trava-línguas curtos pedem o som rápido, sem perder a articulação.",
+      sinal: "Sequência de quatro palavras e um trava-língua sem travar.",
+    },
+    {
+      titulo: "Levar para a conversa",
+      foco: "Habilidades Sociais + Trava-Línguas longos",
+      desc: "A fala sai do exercício e vira uso: pedir, agradecer, recusar. Em paralelo, os trava-línguas longos seguram a articulação sob pressão.",
+      sinal: "Usar três frases do app espontaneamente fora dele.",
+    },
+  ];
+
+  const dicas = [
+    "Dez minutos por dia rendem mais que uma hora no fim de semana — o streak existe para lembrar disso.",
+    "Elogie a tentativa, não só o acerto: o app já comemora o acerto sozinho.",
+    "Deixe a criança escolher o mascote. A meta sobe quando ela estiver pronta, não antes.",
+    "Antes de avançar de semana, repita um dia inteiro do conteúdo anterior.",
+  ];
+
+  return (
+    <section id="rotina" className="scroll-mt-20 mx-auto w-full max-w-6xl px-4 py-14 sm:py-28">
+      <Reveal className="mx-auto max-w-3xl text-center">
+        <span className="text-sm font-bold uppercase tracking-wider text-primary">
+          Como ensinar com o app
+        </span>
+        <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
+          Uma rotina de quatro semanas por fonema
+        </h2>
+        <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+          Sugestão de percurso para quem acompanha em casa — a mesma escada da seção anterior, agora
+          com tempo e sinal de que já dá para avançar. Cada fonema recomeça o ciclo.
+        </p>
+      </Reveal>
+
+      <div className="mt-10 grid gap-4 sm:mt-14 lg:grid-cols-4">
+        {semanas.map((s, i) => (
+          <Reveal key={s.titulo} atraso={i * 0.08}>
+            <div className="flex h-full flex-col rounded-3xl border border-border bg-card p-6 shadow-sm">
+              <span className="w-fit rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                Semana {i + 1}
+              </span>
+              <h3 className="mt-4 font-display text-xl font-bold">{s.titulo}</h3>
+              <p className="mt-1 text-xs font-semibold text-muted-foreground">{s.foco}</p>
+              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+              <p className="mt-4 rounded-2xl bg-success/10 px-3 py-2 text-xs font-semibold text-success">
+                Pode avançar quando: {s.sinal}
+              </p>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+
+      <Reveal atraso={0.2}>
+        <div className="mt-8 rounded-[2rem] border border-border bg-card p-6 shadow-sm sm:p-8">
+          <h3 className="font-display text-xl font-bold">O que faz a diferença na prática</h3>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {dicas.map((d) => (
+              <li key={d} className="flex gap-3 text-base text-muted-foreground">
+                <Check className="mt-0.5 h-5 w-5 shrink-0 text-success" />
+                {d}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-5 text-sm text-muted-foreground">
+            Isto é apoio ao treino, não protocolo clínico: quem define o fonema alvo e o ritmo é a
+            fonoaudióloga que acompanha a criança.
+          </p>
+        </div>
       </Reveal>
     </section>
   );

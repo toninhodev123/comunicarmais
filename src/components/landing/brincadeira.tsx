@@ -39,6 +39,22 @@ const VOZ_DO_MASCOTE: Record<MascotId, "feminina" | "masculina"> = {
   leo: "masculina",
 };
 
+/**
+ * Sorteia sem repetir: as palavras já ditas saem do saco até ele esvaziar.
+ * Como o saco é um só para os três, nenhum deles repete o que o outro falou.
+ */
+function useSacoDePalavras() {
+  const restantes = useRef<string[]>([]);
+  return useRef((excluir?: string) => {
+    if (restantes.current.length === 0) {
+      restantes.current = PALAVRAS.filter((p) => p !== excluir);
+    }
+    const i = Math.floor(Math.random() * restantes.current.length);
+    const [escolhida] = restantes.current.splice(i, 1);
+    return escolhida;
+  }).current;
+}
+
 interface Faisca {
   id: number;
   x: number;
@@ -54,6 +70,8 @@ export function Brincadeira() {
   const [faiscas, setFaiscas] = useState<Faisca[]>([]);
   const [conta, setConta] = useState(0);
   const proximaFaisca = useRef(0);
+  const sortear = useSacoDePalavras();
+  const ultima = useRef<string | null>(null);
 
   // Os olhos seguem o ponteiro dentro da cena; sem ponteiro, voltam ao centro.
   const aoMover = (evento: React.PointerEvent<HTMLDivElement>) => {
@@ -65,7 +83,8 @@ export function Brincadeira() {
   };
 
   const cutucar = (id: MascotId, evento: React.PointerEvent<HTMLDivElement>) => {
-    const escolhida = PALAVRAS[Math.floor(Math.random() * PALAVRAS.length)];
+    const escolhida = sortear(ultima.current ?? undefined);
+    ultima.current = escolhida;
     setPalavra(escolhida);
     setFalando(id);
     setConta((n) => n + 1);
@@ -98,11 +117,12 @@ export function Brincadeira() {
     return () => clearTimeout(t);
   }, [palavra]);
 
-  // No celular o Léo sobe um pouco: lá embaixo ele ficava atrás do contador.
+  // Os três ficam sempre acima da linha do contador — no celular ele ocupa
+  // quase toda a largura de baixo, então todo mundo sobe junto.
   const posicoes = [
-    "left-[6%] bottom-[12%]",
-    "left-[36%] bottom-[34%] sm:bottom-[30%]",
-    "right-[5%] bottom-[24%] sm:bottom-[10%]",
+    "left-[4%] bottom-[24%] sm:bottom-[12%]",
+    "left-[36%] bottom-[44%] sm:bottom-[30%]",
+    "right-[4%] bottom-[26%] sm:bottom-[16%]",
   ];
   const tamanhos = [
     "h-28 w-28 sm:h-40 sm:w-40",
@@ -173,7 +193,10 @@ export function Brincadeira() {
                   falando === m.id && !menosMovimento ? { y: [0, -26, 0, -12, 0] } : { y: 0 }
                 }
                 transition={{ duration: 0.75, ease: "easeOut" }}
-                className={"absolute cursor-grab active:cursor-grabbing " + posicoes[i]}
+                // A caixa não recebe ponteiro; só os traços pintados do SVG
+                // recebem, e o evento sobe daqui para o arrasto do Motion.
+                // Assim clicar no cantinho vazio não conta como cutucada.
+                className={"pointer-events-none absolute " + posicoes[i]}
               >
                 <div className="relative">
                   <AnimatePresence>
@@ -182,7 +205,7 @@ export function Brincadeira() {
                         initial={{ opacity: 0, y: 8, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.95 }}
-                        className="absolute -top-10 left-1/2 w-max -translate-x-1/2 rounded-2xl bg-card px-3 py-1.5 font-display text-sm font-bold capitalize shadow-lg"
+                        className="pointer-events-none absolute -top-10 left-1/2 w-max -translate-x-1/2 rounded-2xl bg-card px-3 py-1.5 font-display text-sm font-bold capitalize shadow-lg"
                       >
                         {palavra}
                       </motion.span>
@@ -191,7 +214,13 @@ export function Brincadeira() {
                   <Mascote
                     id={m.id}
                     olhar={olhar}
-                    className={tamanhos[i] + " drop-shadow-lg [pointer-events:none]"}
+                    // A raiz do <svg> recebe clique em toda a sua caixa, mesmo
+                    // onde não há desenho; tirando o ponteiro dela e devolvendo
+                    // às formas, só os traços pintados respondem.
+                    className={
+                      tamanhos[i] +
+                      " pointer-events-none cursor-grab drop-shadow-lg active:cursor-grabbing [&_*]:pointer-events-auto"
+                    }
                   />
                 </div>
               </motion.div>
