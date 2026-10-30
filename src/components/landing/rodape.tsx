@@ -22,7 +22,7 @@ const COLUNAS = [
       { rotulo: "Mascotes guias", href: "#mascotes" },
       { rotulo: "Brincar com eles", href: "#brincar" },
       { rotulo: "Estrelinhas e metas", href: "#estrelinhas" },
-      { rotulo: "Atividades", href: "#atividades" },
+      { rotulo: "As 9 atividades", href: "#atividades" },
       { rotulo: "Vozes gravadas", href: "#vozes" },
     ],
   },

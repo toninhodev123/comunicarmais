@@ -10,12 +10,14 @@ import {
   Ear,
   Flame,
   Hand,
+  Headphones,
   HeartHandshake,
+  Image as ImageIcon,
+  Lock,
+  MessagesSquare,
   Mic,
   MousePointerClick,
   Repeat,
-  Lock,
-  MessagesSquare,
   ShieldCheck,
   Smartphone,
   Sparkles,
@@ -25,6 +27,7 @@ import {
   Users,
   Volume2,
   Waves,
+  Wind,
   X,
 } from "lucide-react";
 import { mascots } from "@/context/AppContext";
@@ -167,7 +170,75 @@ const ATIVIDADES: Atividade[] = [
     detalhes: [
       "O cronômetro começa sozinho ao tocar em falar e para no instante do acerto.",
       "A verificação aceita a frase inteira, perdoando uma palavrinha em frases longas.",
-      "Quando não passa, o app mostra o que ouviu — ajuda a entender o que repetir.",
+      "Quando não passa, vem incentivo em vez do que o microfone entendeu: errar não pode virar motivo para desistir.",
+    ],
+  },
+  {
+    id: "pares",
+    nome: "Pares Mínimos",
+    resumo: "Duas palavras que mudam de sentido por um som só: faca ou vaca, rua ou lua.",
+    icone: Ear,
+    cor: "oklch(0.78 0.13 195)",
+    numeros: [
+      { valor: "19", rotulo: "pares" },
+      { valor: "2", rotulo: "etapas por par" },
+      { valor: "6", rotulo: "tipos de contraste" },
+    ],
+    detalhes: [
+      "Primeiro a criança escuta e aponta qual das duas foi dita — ouvir a diferença vem antes de produzi-la.",
+      "Depois ela fala, e o microfone precisa separar uma da outra: dizer “bolo” nunca passa por “bola”.",
+      "Cada par explica o que muda na boca: “a boca é a mesma; no V a garganta vibra, no F não”.",
+    ],
+  },
+  {
+    id: "discriminacao",
+    nome: "Igual ou Diferente",
+    resumo: "Duas palavras seguidas. São a mesma, ou mudou um som? Só de ouvido.",
+    icone: Headphones,
+    cor: "oklch(0.78 0.13 90)",
+    numeros: [
+      { valor: "10", rotulo: "rodadas" },
+      { valor: "50%", rotulo: "são a mesma palavra" },
+      { valor: "0", rotulo: "microfone necessário" },
+    ],
+    detalhes: [
+      "Metade das rodadas repete a mesma palavra — sem isso dá para responder “diferentes” sempre e acertar tudo sem ouvir.",
+      "Quando erra, o app mostra quais eram e qual era o contraste.",
+      "É a única atividade que dispensa microfone: funciona em qualquer navegador.",
+    ],
+  },
+  {
+    id: "nomear",
+    nome: "Que figura é essa?",
+    resumo: "Só a imagem na tela. A palavra tem de sair da criança.",
+    icone: ImageIcon,
+    cor: "oklch(0.78 0.13 320)",
+    numeros: [
+      { valor: "289", rotulo: "figuras" },
+      { valor: "0", rotulo: "palavra escrita" },
+      { valor: "2", rotulo: "ajudas quando trava" },
+    ],
+    detalhes: [
+      "Sem o texto na tela não há como copiar: é o que mais se parece com falar fora do app.",
+      "As ajudas seguem a ordem de um terapeuta — ouvir o modelo primeiro, ver escrito só depois.",
+      "Dá para escolher o fonema e treinar só as palavras daquele som.",
+    ],
+  },
+  {
+    id: "sopro",
+    nome: "Sopro e Respiração",
+    resumo: "A vela, a bolha de sabão e o canudo, com o tempo contado na tela.",
+    icone: Wind,
+    cor: "oklch(0.80 0.11 210)",
+    numeros: [
+      { valor: "4", rotulo: "exercícios" },
+      { valor: "3", rotulo: "fases por respiração" },
+      { valor: "0", rotulo: "áudio gravado" },
+    ],
+    detalhes: [
+      "Falar depende de ar: sem sopro firme a frase morre no fim e os sons de pressão se perdem.",
+      "Um círculo respira junto e conta inspirar, segurar e soprar — não é preciso saber a hora.",
+      "O microfone é opcional e nada é gravado: ele só mede o volume para a criança ver o próprio sopro mexendo no desenho.",
     ],
   },
   {
@@ -195,7 +266,7 @@ const NUMEROS_CONTEUDO = [
   { valor: 199, rotulo: "partes de objetos", detalhe: "o volante do carro, a gema do ovo" },
   { valor: 920, rotulo: "áudios gravados", detalhe: "460 em cada voz, sem IA ao vivo" },
   { valor: 27, rotulo: "frases completas", detalhe: "12 trava-línguas e 15 frases sociais" },
-  { valor: 5, rotulo: "atividades diárias", detalhe: "com meta própria em cada uma" },
+  { valor: 9, rotulo: "atividades", detalhe: "cinco na meta diária, quatro como extra" },
 ];
 
 const CUIDADOS = [
@@ -431,7 +502,7 @@ function Heroi() {
             <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4">
               {[
                 { valor: 920, rotulo: "áudios com voz humana" },
-                { valor: 5, rotulo: "atividades diárias" },
+                { valor: 9, rotulo: "atividades" },
                 { valor: 3, rotulo: "mascotes guias" },
               ].map((e) => (
                 <div key={e.rotulo}>
@@ -962,7 +1033,7 @@ function Atividades() {
             O que tem dentro
           </span>
           <h2 className="mt-3 font-display text-[1.75rem] font-bold leading-tight sm:text-5xl">
-            Cinco jeitos de treinar a mesma fala
+            Nove jeitos de treinar a mesma fala
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
             Toque numa atividade para ver o que ela tem por dentro. Todas falam, escutam e dão
@@ -1465,7 +1536,7 @@ function FaixaNumeros() {
     { valor: 13, rotulo: "fonemas" },
     { valor: 289, rotulo: "palavras" },
     { valor: 920, rotulo: "áudios" },
-    { valor: 5, rotulo: "atividades" },
+    { valor: 9, rotulo: "atividades" },
   ];
   return (
     <section className="relative overflow-hidden bg-foreground py-14 text-background sm:py-16">
