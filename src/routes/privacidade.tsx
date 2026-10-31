@@ -58,8 +58,9 @@ const SECOES: SecaoLegal[] = [
     corpo: (
       <>
         <p>
-          O Comunicar+ é desenvolvido e operado pela <strong>{EMPRESA.nome}</strong>, responsável
-          pelo tratamento dos dados descritos aqui.
+          O Comunicar+ é desenvolvido e operado pela <strong>{EMPRESA.nome}</strong>, inscrita no
+          CNPJ sob o nº <strong>{EMPRESA.cnpj}</strong>, controladora e responsável pelo tratamento
+          dos dados descritos aqui.
         </p>
         <p>
           Para qualquer assunto desta política — pedidos, dúvidas, correções ou exclusão —, fale com

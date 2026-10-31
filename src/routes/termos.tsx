@@ -24,10 +24,10 @@ const SECOES: SecaoLegal[] = [
     titulo: "Ao usar, você concorda",
     corpo: (
       <p>
-        Estes termos são o acordo entre você e a <strong>{EMPRESA.nome}</strong> sobre o uso do
-        Comunicar+. Usando o app, você concorda com eles. Se não concordar com algum ponto, basta
-        não usar. Se a pessoa que vai usar é uma criança, quem aceita estes termos é o adulto
-        responsável.
+        Estes termos são o acordo entre você e a <strong>{EMPRESA.nome}</strong>, CNPJ{" "}
+        <strong>{EMPRESA.cnpj}</strong>, sobre o uso do Comunicar+. Usando o app, você concorda com
+        eles. Se não concordar com algum ponto, basta não usar. Se a pessoa que vai usar é uma
+        criança, quem aceita estes termos é o adulto responsável.
       </p>
     ),
   },

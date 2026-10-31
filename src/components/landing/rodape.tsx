@@ -13,6 +13,7 @@ export const EMPRESA = {
   site: "https://ccosoftwarelab.com/",
   siteRotulo: "ccosoftwarelab.com",
   email: "support@ccosoftwarelab.com",
+  cnpj: "69.081.944/0001-37",
 };
 
 const COLUNAS = [
@@ -157,7 +158,8 @@ export function Rodape() {
 
         <div className="mt-8 flex flex-col gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {ano} {EMPRESA.nome}. Todos os direitos reservados.
+            © {ano} {EMPRESA.nome} · CNPJ {EMPRESA.cnpj}
+            <span className="block sm:inline"> · Todos os direitos reservados.</span>
           </p>
           <p className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <Link to="/privacidade" className="transition-colors hover:text-foreground">
