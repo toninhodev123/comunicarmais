@@ -47,6 +47,8 @@ import { ExploradorDeFonemas } from "@/components/landing/explorador";
 import { TesteDeMicrofone } from "@/components/landing/teste-microfone";
 import { MontadorDePlano } from "@/components/landing/plano";
 import { Rodape } from "@/components/landing/rodape";
+import { Glossario } from "@/components/landing/glossario";
+import { SimuladorDeMetas } from "@/components/landing/simulador";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -363,6 +365,7 @@ function Landing() {
       <RotinaDeEstudo />
       <MontadorDePlano />
       <Pontuacao />
+      <SimuladorDeMetas />
       <Atividades />
       <TelasDoApp />
       {/* A chave remonta a galeria ao mudar de celular para desktop: o
@@ -373,6 +376,7 @@ function Landing() {
       <Cuidado />
       <ParaAdultos />
       <Privacidade />
+      <Glossario />
       <Perguntas />
       <Fechamento />
       <Rodape />
@@ -397,6 +401,7 @@ function Topo() {
     { href: "#estudar", texto: "Estudar" },
     { href: "#testar", texto: "Testar" },
     { href: "#plano", texto: "Plano" },
+    { href: "#glossario", texto: "Glossário" },
     { href: "#atividades", texto: "Atividades" },
     { href: "#vozes", texto: "Vozes" },
     { href: "#perguntas", texto: "Perguntas" },

@@ -77,9 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Treino de fala, vocabulário e ritmo de forma lúdica e acessível.",
       },
       { property: "og:type", content: "website" },
+      { name: "theme-color", content: "#009ca5" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      // SVG no navegador moderno; o PNG cobre iOS, que ignora SVG.
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/icone-180.png", sizes: "180x180" },
+      { rel: "manifest", href: "/site.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {

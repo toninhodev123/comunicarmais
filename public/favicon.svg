@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Comunicar+">
+  <!-- Balão de fala com um "+" dentro: a marca do app reduzida ao que
+       ainda se lê num ícone de 16 px. Cores iguais aos tokens do site. -->
+  <rect width="64" height="64" rx="15" fill="#009ca5"/>
+  <path d="M19 12h26a9 9 0 0 1 9 9v16a9 9 0 0 1-9 9h-9l-12 8 2-8h-7a9 9 0 0 1-9-9V21a9 9 0 0 1 9-9z"
+        fill="#ffffff"/>
+  <path d="M32 21v16M24 29h16" stroke="#009ca5" stroke-width="6.5" stroke-linecap="round"/>
+</svg>
