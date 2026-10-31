@@ -9,7 +9,7 @@ import { ExternalLink, Globe, Mail, ShieldCheck, Sparkles } from "lucide-react";
 
 /** Dados da empresa. Trocar aqui muda o rodapé e as páginas legais. */
 export const EMPRESA = {
-  nome: "CCO Software",
+  nome: "CCO Software Lab",
   site: "https://ccosoftwarelab.com/",
   siteRotulo: "ccosoftwarelab.com",
   email: "support@ccosoftwarelab.com",
