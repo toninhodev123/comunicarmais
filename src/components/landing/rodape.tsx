@@ -1,5 +1,4 @@
-import { Link } from "@tanstack/react-router";
-import { ExternalLink, Globe, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { ShieldCheck, Sparkles } from "lucide-react";
 
 /**
  * Rodapé da landing: além dos links, é onde fica a informação que ninguém lê
@@ -45,7 +44,7 @@ export function Rodape() {
   return (
     <footer className="border-t border-border bg-card/40">
       <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:py-20">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_repeat(3,0.8fr)] [&>*]:min-w-0">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(2,0.8fr)] [&>*]:min-w-0">
           {/* marca */}
           <div>
             <p className="font-display text-2xl font-bold">
@@ -85,66 +84,6 @@ export function Rodape() {
               </ul>
             </nav>
           ))}
-
-          {/* empresa e contato */}
-          <div>
-            <p className="font-display text-sm font-bold uppercase tracking-wider">Empresa</p>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Comunicar+ é um produto da{" "}
-              <span className="font-semibold text-foreground">{EMPRESA.nome}</span>.
-            </p>
-            <ul className="mt-4 space-y-2.5">
-              <li>
-                <a
-                  href={EMPRESA.site}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Globe className="h-4 w-4 shrink-0" />
-                  {EMPRESA.siteRotulo}
-                  <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
-                </a>
-              </li>
-              <li>
-                <a
-                  href={`mailto:${EMPRESA.email}`}
-                  className="flex items-center gap-2 break-all text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <Mail className="h-4 w-4 shrink-0" />
-                  {EMPRESA.email}
-                </a>
-              </li>
-            </ul>
-
-            <p className="mt-6 font-display text-sm font-bold uppercase tracking-wider">Legal</p>
-            <ul className="mt-4 space-y-2.5">
-              <li>
-                <Link
-                  to="/privacidade"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Política de Privacidade
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/termos"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Termos de Uso
-                </Link>
-              </li>
-              <li>
-                <a
-                  href={`mailto:${EMPRESA.email}?subject=Dados%20pessoais%20-%20Comunicar%2B`}
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Pedir ou apagar meus dados
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* aviso clínico, em destaque — é o que mais importa dizer */}
@@ -157,17 +96,8 @@ export function Rodape() {
         </div>
 
         <div className="mt-8 flex flex-col gap-4 border-t border-border pt-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {ano} {EMPRESA.nome} · CNPJ {EMPRESA.cnpj}
-            <span className="block sm:inline"> · Todos os direitos reservados.</span>
-          </p>
+          <p>© {ano} Comunicar+ · Todos os direitos reservados.</p>
           <p className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <Link to="/privacidade" className="transition-colors hover:text-foreground">
-              Privacidade
-            </Link>
-            <Link to="/termos" className="transition-colors hover:text-foreground">
-              Termos
-            </Link>
             <a href="#topo" className="transition-colors hover:text-foreground">
               Voltar ao topo
             </a>

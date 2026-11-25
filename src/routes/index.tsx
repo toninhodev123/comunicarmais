@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import {
-  ArrowDown,
+  ArrowRight,
   BookOpen,
   Brain,
   Check,
@@ -425,8 +425,8 @@ function Topo() {
             </a>
           ))}
         </div>
-        <Button asChild variant="outline" className="h-11 rounded-2xl px-5 text-base">
-          <a href="#atividades">Ver por dentro</a>
+        <Button asChild className="h-11 rounded-2xl px-5 text-base">
+          <Link to="/entrar">Entrar</Link>
         </Button>
       </nav>
     </header>
@@ -488,9 +488,9 @@ function Heroi() {
           <Reveal atraso={0.24}>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild className="h-14 rounded-2xl px-7 text-lg">
-                <a href="#atividades">
-                  Conhecer as atividades <ArrowDown className="ml-2 h-5 w-5" />
-                </a>
+                <Link to="/entrar">
+                  Acessar o sistema <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
               </Button>
               <Button
                 variant="outline"
@@ -1509,9 +1509,9 @@ function Fechamento() {
               instalar nada.
             </p>
             <Button asChild className="mt-8 h-14 rounded-2xl px-8 text-lg">
-              <a href="#atividades">
-                Ver as atividades de novo <ArrowDown className="ml-2 h-5 w-5" />
-              </a>
+              <Link to="/entrar">
+                Começar agora <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </div>
         </div>
