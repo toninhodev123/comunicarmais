@@ -20,9 +20,7 @@ import { Route as MemoriaRouteImport } from './routes/memoria'
 import { Route as NomearRouteImport } from './routes/nomear'
 import { Route as ParesRouteImport } from './routes/pares'
 import { Route as PersonalizarRouteImport } from './routes/personalizar'
-import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as SoproRouteImport } from './routes/sopro'
-import { Route as TermosRouteImport } from './routes/termos'
 import { Route as VocabularioRouteImport } from './routes/vocabulario'
 
 const IndexRoute = IndexRouteImport.update({
@@ -80,19 +78,9 @@ const PersonalizarRoute = PersonalizarRouteImport.update({
   path: '/personalizar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivacidadeRoute = PrivacidadeRouteImport.update({
-  id: '/privacidade',
-  path: '/privacidade',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SoproRoute = SoproRouteImport.update({
   id: '/sopro',
   path: '/sopro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TermosRoute = TermosRouteImport.update({
-  id: '/termos',
-  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VocabularioRoute = VocabularioRouteImport.update({
@@ -113,9 +101,7 @@ export interface FileRoutesByFullPath {
   '/nomear': typeof NomearRoute
   '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
-  '/privacidade': typeof PrivacidadeRoute
   '/sopro': typeof SoproRoute
-  '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
 export interface FileRoutesByTo {
@@ -130,9 +116,7 @@ export interface FileRoutesByTo {
   '/nomear': typeof NomearRoute
   '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
-  '/privacidade': typeof PrivacidadeRoute
   '/sopro': typeof SoproRoute
-  '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
 export interface FileRoutesById {
@@ -148,9 +132,7 @@ export interface FileRoutesById {
   '/nomear': typeof NomearRoute
   '/pares': typeof ParesRoute
   '/personalizar': typeof PersonalizarRoute
-  '/privacidade': typeof PrivacidadeRoute
   '/sopro': typeof SoproRoute
-  '/termos': typeof TermosRoute
   '/vocabulario': typeof VocabularioRoute
 }
 export interface FileRouteTypes {
@@ -167,9 +149,7 @@ export interface FileRouteTypes {
     | '/nomear'
     | '/pares'
     | '/personalizar'
-    | '/privacidade'
     | '/sopro'
-    | '/termos'
     | '/vocabulario'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -184,9 +164,7 @@ export interface FileRouteTypes {
     | '/nomear'
     | '/pares'
     | '/personalizar'
-    | '/privacidade'
     | '/sopro'
-    | '/termos'
     | '/vocabulario'
   id:
     | '__root__'
@@ -201,9 +179,7 @@ export interface FileRouteTypes {
     | '/nomear'
     | '/pares'
     | '/personalizar'
-    | '/privacidade'
     | '/sopro'
-    | '/termos'
     | '/vocabulario'
   fileRoutesById: FileRoutesById
 }
@@ -219,9 +195,7 @@ export interface RootRouteChildren {
   NomearRoute: typeof NomearRoute
   ParesRoute: typeof ParesRoute
   PersonalizarRoute: typeof PersonalizarRoute
-  PrivacidadeRoute: typeof PrivacidadeRoute
   SoproRoute: typeof SoproRoute
-  TermosRoute: typeof TermosRoute
   VocabularioRoute: typeof VocabularioRoute
 }
 
@@ -304,25 +278,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PersonalizarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/privacidade': {
-      id: '/privacidade'
-      path: '/privacidade'
-      fullPath: '/privacidade'
-      preLoaderRoute: typeof PrivacidadeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sopro': {
       id: '/sopro'
       path: '/sopro'
       fullPath: '/sopro'
       preLoaderRoute: typeof SoproRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/termos': {
-      id: '/termos'
-      path: '/termos'
-      fullPath: '/termos'
-      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vocabulario': {
@@ -347,9 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   NomearRoute: NomearRoute,
   ParesRoute: ParesRoute,
   PersonalizarRoute: PersonalizarRoute,
-  PrivacidadeRoute: PrivacidadeRoute,
   SoproRoute: SoproRoute,
-  TermosRoute: TermosRoute,
   VocabularioRoute: VocabularioRoute,
 }
 export const routeTree = rootRouteImport

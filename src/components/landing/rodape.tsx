@@ -2,18 +2,8 @@ import { ShieldCheck, Sparkles } from "lucide-react";
 
 /**
  * Rodapé da landing: além dos links, é onde fica a informação que ninguém lê
- * no meio da página e todo mundo procura no fim — quem fez, como falar com a
- * gente, o que o app faz com os dados e os avisos de uso.
+ * no meio da página e todo mundo procura no fim — os avisos de uso.
  */
-
-/** Dados da empresa. Trocar aqui muda o rodapé e as páginas legais. */
-export const EMPRESA = {
-  nome: "CCO Software Lab",
-  site: "https://ccosoftwarelab.com/",
-  siteRotulo: "ccosoftwarelab.com",
-  email: "support@ccosoftwarelab.com",
-  cnpj: "69.081.944/0001-37",
-};
 
 const COLUNAS = [
   {
