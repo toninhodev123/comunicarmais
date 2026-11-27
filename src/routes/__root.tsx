@@ -132,7 +132,7 @@ function AppShell() {
   const { session, authCarregando } = useApp();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // A landing não espera o Supabase responder: ela é igual para todo mundo.
+  // A landing não espera a sessão: ela é igual para todo mundo.
   if (ROTAS_PUBLICAS.includes(pathname)) {
     return (
       <>

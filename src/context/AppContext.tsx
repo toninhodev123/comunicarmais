@@ -1,6 +1,4 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
 
 export type MascotId = "leo" | "nina" | "tito";
 export type ThemeColor = "teal" | "coral" | "violet" | "sunshine" | "forest";
@@ -109,11 +107,10 @@ interface AppContextValue {
   // configuração inicial de mascote/meta
   needsSetup: boolean;
   concluirConfiguracao: (id: MascotId) => void;
-  // login (Supabase Auth) — progresso só sincroniza com a nuvem quando logado
-  session: Session | null;
+  // login local: uma conta fixa, conferida no próprio navegador
+  session: Sessao | null;
   authCarregando: boolean;
   entrar: (email: string, senha: string) => Promise<string | null>;
-  cadastrar: (email: string, senha: string) => Promise<string | null>;
   sair: () => Promise<void>;
 }
 
@@ -122,6 +119,48 @@ const AppContext = createContext<AppContextValue | null>(null);
 const STARS_STORAGE_KEY = "comunicar-plus:stars";
 const DAILY_STORAGE_KEY = "comunicar-plus:daily";
 const MASCOT_STORAGE_KEY = "comunicar-plus:mascot";
+const THEME_STORAGE_KEY = "comunicar-plus:theme";
+const SESSION_STORAGE_KEY = "comunicar-plus:session";
+
+export interface Sessao {
+  user: { email: string };
+}
+
+/**
+ * Conta de acesso. Tudo roda no navegador, então a senha fica guardada só
+ * como hash SHA-256 — nunca em texto. Isso não é segurança de verdade (quem
+ * abrir o código vê o e-mail e pode tentar adivinhar a senha), só evita que
+ * ela fique legível. Para trocar a senha, gere o hash novo com:
+ *   printf '%s' 'NovaSenha' | sha256sum
+ */
+const CONTA = {
+  email: "comunicarmais@gmail.com",
+  senhaSha256: "0b9c6f996d85101293bf11461e53e4921541247fb6b94cfb5a3435a961bacbfa",
+};
+
+async function sha256(texto: string) {
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(texto));
+  return Array.from(new Uint8Array(bytes), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function lerStorage<T>(chave: string): T | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const salvo = window.localStorage.getItem(chave);
+    return salvo ? (JSON.parse(salvo) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function gravarStorage(chave: string, valor: unknown) {
+  try {
+    if (valor === null) window.localStorage.removeItem(chave);
+    else window.localStorage.setItem(chave, JSON.stringify(valor));
+  } catch {
+    // modo privado ou armazenamento cheio: segue sem salvar
+  }
+}
 
 interface DailyProgress {
   date: string;
@@ -172,11 +211,18 @@ function carregarMascoteId(): MascotId | null {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Sessao | null>(null);
   const [authCarregando, setAuthCarregando] = useState(true);
   const [needsSetup, setNeedsSetup] = useState(() => carregarMascoteId() === null);
   const [mascotId, setMascotId] = useState<MascotId>(() => carregarMascoteId() ?? "leo");
-  const [themeColor, setThemeColor] = useState<ThemeColor>("teal");
+  const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
+    const salvo = lerStorage<ThemeColor>(THEME_STORAGE_KEY);
+    return salvo && salvo in themeColors ? salvo : "teal";
+  });
+
+  useEffect(() => {
+    gravarStorage(THEME_STORAGE_KEY, themeColor);
+  }, [themeColor]);
   const [starsByArea, setStarsByArea] = useState<Record<string, number>>(() => {
     if (typeof window === "undefined") return {};
     try {
@@ -223,62 +269,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     root.style.setProperty("--ring", c.ring);
   }, [themeColor]);
 
-  // Observa o login: pega a sessão atual e escuta login/logout.
+  // A sessão fica no navegador: quem já entrou continua dentro ao reabrir.
+  // Lida só depois de montar, para o HTML do servidor e o do navegador baterem.
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setAuthCarregando(false);
-    });
-    const { data: assinatura } = supabase.auth.onAuthStateChange((_evento, novaSessao) => {
-      setSession(novaSessao);
-    });
-    return () => assinatura.subscription.unsubscribe();
+    const salva = lerStorage<Sessao>(SESSION_STORAGE_KEY);
+    if (salva?.user?.email?.toLowerCase() === CONTA.email) setSession(salva);
+    setAuthCarregando(false);
   }, []);
-
-  // Ao logar, busca o progresso salvo na nuvem (ou cria a linha na primeira vez).
-  useEffect(() => {
-    if (!session) return;
-    let cancelado = false;
-    supabase
-      .from("progresso")
-      .select("mascote_id, estrelas_por_area, sequencia")
-      .eq("usuario_id", session.user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (cancelado || error) return;
-        if (data) {
-          if (mascots.some((m) => m.id === data.mascote_id)) {
-            setMascotId(data.mascote_id as MascotId);
-          }
-          setStarsByArea((data.estrelas_por_area as Record<string, number>) ?? {});
-          setNeedsSetup(false);
-        } else {
-          supabase.from("progresso").upsert({ usuario_id: session.user.id }).then();
-        }
-      });
-    return () => {
-      cancelado = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
-
-  // Enquanto logado, todo progresso novo é salvo também na nuvem (best-effort).
-  useEffect(() => {
-    if (!session) return;
-    supabase
-      .from("progresso")
-      .upsert({
-        usuario_id: session.user.id,
-        mascote_id: mascotId,
-        estrelas_por_area: starsByArea,
-        sequencia: daily.streak,
-        atualizado_em: new Date().toISOString(),
-      })
-      .then(({ error }) => {
-        if (error) console.error("Falha ao sincronizar progresso:", error.message);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, mascotId, starsByArea, daily.streak]);
 
   const mascot = mascots.find((m) => m.id === mascotId)!;
 
@@ -329,15 +326,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       session,
       authCarregando,
       entrar: async (email, senha) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-        return error?.message ?? null;
-      },
-      cadastrar: async (email, senha) => {
-        const { error } = await supabase.auth.signUp({ email, password: senha });
-        return error?.message ?? null;
+        const emailOk = email.trim().toLowerCase() === CONTA.email;
+        const senhaOk = (await sha256(senha)) === CONTA.senhaSha256;
+        if (!emailOk || !senhaOk) return "E-mail ou senha incorretos.";
+        const nova: Sessao = { user: { email: CONTA.email } };
+        gravarStorage(SESSION_STORAGE_KEY, nova);
+        setSession(nova);
+        return null;
       },
       sair: async () => {
-        await supabase.auth.signOut();
+        gravarStorage(SESSION_STORAGE_KEY, null);
+        setSession(null);
       },
     }),
     [mascot, themeColor, starsByArea, daily, needsSetup, session, authCarregando],
